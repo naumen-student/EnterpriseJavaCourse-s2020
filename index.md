@@ -18,8 +18,8 @@ layout: default
 * *Зачет*
 
 ## Практика
-[общие правила практики](doc/practice.md)
-[пример практики](doc/practice_example.md)
+- [общие правила практики](doc/practice.md)
+- [пример практики](doc/practice_example.md)
 
 
 ## Дополнительные материалы
