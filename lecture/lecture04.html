@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>RPC или социализация приложений</title>
+
+    <meta name="description" content="RPC или социализация приложений">
+    <meta name="author" content="Titov Egor" >
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+    <link rel="stylesheet" href="css/hljs/vs.css" id="highlight-theme">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+
+<body>
+
+<div class="reveal">
+    <div class="footer">
+        <span class="corp-name"><b>NAUMEN </b></span>Титов Егор
+    </div>
+    
+    <div class="slides">
+        <section>
+            <h1>RPC</h1>
+            <h2>или социализация приложений</h2>
+        </section>
+        <section>
+            <h1>RPC</h1>
+            <ul>
+                <li>Remote Procedure Call</li>
+                <li>Удалённый вызов процедур</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RPC зачем?</h1>
+            <ul>
+                <li>Уменьшить использование ресурсов</li>
+                <li>Разнести логику</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RPC что?</h1>
+            <ul>
+                <li>это не протокол!</li>
+                <li>это набор <strong>технологий</strong></li>
+            </ul>
+        </section>
+        <section>
+            <h1>RPC из чего состоит</h1>
+            <ul>
+                <li>протокол обмена</li>
+                <li>сериализатор данных</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RPC протокол обмена</h1>
+            <ul>
+                <li>TCP/UDP</li>
+                <li>HTTP(S) [хотя и не является транспортным уровнем ISO/OSI]</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RPC сериализаторы</h1>
+            <ul>
+                <li>текстовый
+                    <ul><li>XML</li>
+                        <li>JSON</li>
+                    </ul>
+                </li>
+                <li>бинарный</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Особенности вызова</h1>
+            <ul>
+                <li>Асимметричность</li>
+                <li>Синхронность</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Более сложная реализация</h1>
+            <ul>
+                <li>Разделение адресного пространства</li>
+                <li>Транспорт</li>
+                <li>аварийные ситуации на одном из концов</li>
+                <li>Неоднородность</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RMI</h1>
+            <h2>Remote Method Invocation</h2>
+        </section>
+        <section>
+            <h1>RMI</h1>
+            <ul>
+                <li>API Java</li>
+                <li>служит для выполнения кода на другой JVM</li>
+                <li>Связь клиент-серверная</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RMI что кого</h1>
+            <ul>
+                <li>Объекты передаются по значению (Serializeble)</li>
+                <li>Удаленные объекты передаются в виде Stub</li>
+                <li>RemoteException</li>
+                <li>всё можно найти в java.rmi.*</li>
+            </ul>
+        </section>
+        <section>
+            <h1>RMI интерфейс</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface RMIInterface extends Remote {
+    String sayHello(String name) throws RemoteException;
+}</code></pre>
+        </section>
+        <section>
+            <h1>RMI сервер</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import java.rmi.*;
+import java.rmi.registry.*;
+import java.rmi.server.*;
+
+public class RMIServer implements RMIInterface {
+
+    public String sayHello(String name) {
+        String string = "Hello, " + name + "!";
+        return string;
+    }
+
+    public static void main(String... args) throws Exception {
+        final Registry registry = LocateRegistry.createRegistry(2099);
+        final RMIInterface service = new RMIServer();
+        Remote stub = UnicastRemoteObject.exportObject(service, 0);
+        registry.bind("sample/HelloService", stub);
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>RMI клиент</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import java.rmi.registry.*;
+
+public class RMIClient {
+    public static void main(String... args) throws Exception {
+        Registry registry = LocateRegistry.getRegistry("localhost", 2099);
+        RMIInterface service = (RMIInterface) registry
+                .lookup("sample/HelloService");
+        String[] names = { "John", "Jan", "Иван"};
+        for (String name : names) {
+            System.out.println(service.sayHello(name));
+        }
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>RMI безопасность</h1>
+            <pre style="width:auto;"><code data-trim class="javascript">
+grant {
+    permission java.net.SocketPermission "127.0.0.1:*", "connect,resolve";
+    permission java.net.SocketPermission "127.0.0.1:*", "accept";
+};
+        </code></pre>
+            <pre style="width:auto;"><code data-trim class="javascript">
+grant {
+    permission java.security.AllPermission;
+};
+        </code></pre>
+        </section>
+        <section>
+            <h1>RMI и современность</h1>
+            <ul>
+                <li>JMX</li>
+                <li>jconsole</li>
+                <li>jvisualvm</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SOAP</h1>
+            <h2>Simple Object Access Protocol</h2>
+        </section>
+        <section>
+            <h1>SOAP</h1>
+            <ul>
+                <li>RPC</li>
+                <li>обмен сообщениями</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SOAP</h1>
+            <ul>
+                <li>расширение XML-RPC</li>
+                <li>транспорт HTTP(S), SMTP, FTP, TCP, UDP</li>
+                <li>WSDL [Web Service Destribution Language]</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SOAP RPC</h1>
+            <table>
+                <thead>
+                <tr><td>encoded</td>
+                    <td>literal</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre style="width:auto;"><code data-trim class="xml">
+<soap:envelope>
+  <soap:body>
+    <method1>
+      <x xsi:type="xsd:int">5</x>
+      <y xsi:type="xsd:float">5.0</y>
+    </method1>
+  </soap:body>
+</soap:envelope>
+        </code></pre></td>
+                    <td><pre style="width:auto;"><code data-trim class="xml">
+<soap:envelope>
+  <soap:body>
+    <method1>
+      <x>5</x>
+      <y>5.0</y>
+    </method1>s
+  </soap:body>
+</soap:envelope>
+        </code></pre></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h1>SOAP Document</h1>
+            <table>
+                <thead>
+                <tr><td>Document</td>
+                <td>RPC</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><pre style="width:auto;"><code data-trim class="xml">
+<types>
+    <schema>
+        <element name="xElement" type="xsd:int"/>
+        <element name="yElement" type="xsd:float"/>
+    </schema>
+</types>
+<message name="myMethodRequest">
+    <part name="x" element="xElement"></part>
+    <part name="y" element="yElement"></part>
+</message>
+<message name="empty"></message>
+<portType name="PT">
+    <operation name="myMethod">
+        <input message="myMethodRequest">
+        <output message="empty"></output>
+    </operation>
+</portType>
+        </code></pre></td>
+                    <td><pre style="width:auto;"><code data-trim class="xml">
+<message name="myMethodRequest">
+    <part name="x" type="xsd:int"/>
+    <part name="y" type="xsd:float"/>
+</message>
+<message name="empty"/>
+<portType name="PT">
+    <operation name="myMethod">
+        <input message="myMethodRequest"/>
+        <output message="empty"/>
+    </operation>
+</portType>
+        </code></pre></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h1>SOAP минусы</h1>
+            <ul>
+                <li>избыточость информации</li>
+                <li>неторопливсть</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SOAP плюсы</h1>
+            <ul>
+                <li>кроссплатформенность</li>
+                <li>расширяемость (WS-адресация)</li>
+                <li>нейтралитет (протоколы)</li>
+                <li>независимость (модель программирования)</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import javax.jws.WebService;
+import javax.jws.soap.SOAPBinding;
+
+@WebService
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+public interface SOAPInterface {
+    String sayHello(String name);
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import javax.jws.WebService;
+
+@WebService(endpointInterface = "ru.matmex.rpc.soap.SOAPInterface")
+public class SOAPImpl implements SOAPInterface {
+    @Override
+    public String sayHello(String name) {
+        return "Hello " + name + "!";
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import javax.xml.ws.Endpoint;
+
+public class SOAPServer {
+
+    public static void main(String... args) {
+        Endpoint.publish("http://localhost:9999/ws/hello", new SOAPImpl());
+    }
+
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+
+public class SOAPClient {
+    public static void main(String... args) throws Exception {
+        URL url = new URL("http://localhost:9999/ws/hello?wsdl");
+        QName qname = new QName("http://soap.rpc.matmex.ru/", "SOAPImplService");
+        Service service = Service.create(url, qname);
+        SOAPInterface hello = service.getPort(SOAPInterface.class);
+        System.out.println(hello.sayHello("Magaz"));
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="bash">
+wsimport -keep http://localhost:9999/ws/hello?wsdl
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+@WebServiceClient(name = "SOAPImplService",
+                targetNamespace = "http://soap.rpc.matmex.ru/",
+                wsdlLocation = "http://localhost:9999/ws/hello?wsdl")
+public class SOAPImplService extends Service {/**/}
+</code></pre><pre style="width:auto;"><code data-trim class="java">
+@WebService(name = "SOAPInterface", targetNamespace = "http://soap.rpc.matmex.ru/")
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+public interface SOAPInterface {/**/}
+        </code></pre>
+        </section>
+        <section>
+            <h1>SOAP примеры</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+public class SOAPClientWSImport {
+    public static void main(String... args) {
+        SOAPImplService helloService = new SOAPImplService();
+        SOAPInterface hello = helloService.getSOAPImplPort();
+        System.out.println(hello.sayHello("Magaz"));
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>HTTP</h1>
+            <h3>HyperText Transfer Protocol</h3>
+            <h4>протокол передачи гипертекста</h4>
+        </section>
+        <section>
+            <h1>HTTP</h1>
+            <ul>
+                <li>протокол прикладного уровня</li>
+                <li>клиент-север, запрос-ответ</li>
+            </ul>
+        </section>
+        <section>
+            <h1>HTTP методы</h1>
+            <ul>
+                <li>GET</li>
+                <li>POST</li>
+                <li>PUT</li>
+                <li>DELETE</li>
+                <li>HEAD</li>
+                <li>OPTIONS</li>
+            </ul>
+        </section>
+        <section>
+            <h1>HTTP заголовки</h1>
+            <ul>
+                <li>Host</li>
+                <li>User-Agent</li>
+                <li>Accept</li>
+                <li>Content-Type</li>
+                <li>DoNotTrack</li>
+            </ul>
+        </section>
+        <section>
+            <h1>HTTP коды ответа</h1>
+            <ul>
+                <li>1xx - информационные</li>
+                <li>2xx - успешно</li>
+                <li>3xx - перенаправление</li>
+                <li>4xx - ошибка клиента</li>
+                <li>5xx - ошибка сервера</li>
+            </ul>    
+        </section>
+        <section>
+            <h1>HTTP запрос</h1>
+            <pre style="width:auto;"><code data-trim class="conf">
+GET /search?q=REST HTTP/2
+Host: www.google.com
+Accept-Encoding: deflate, gzip, br
+User-Agent: Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:65.0) Gecko/20100101 Firefox/65.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3
+Connection: keep-alive
+</code></pre>
+        </section>
+        <section>
+            <h1>HTTP ответ</h1>
+            <pre style="width:auto;"><code data-trim class="conf">
+HTTP/2 200 
+content-type: text/html; charset=UTF-8
+date: Tue, 12 Mar 2019 20:12:12 GMT
+expires: -1
+cache-control: private, max-age=0
+trailer: X-Google-GFE-Current-Request-Cost-From-GWS
+strict-transport-security: max-age=31536000
+content-encoding: br
+server: gws
+x-xss-protection: 1; mode=block
+x-frame-options: SAMEORIGIN
+</code></pre>
+        </section>
+        <section>
+            <h1>REST</h1>
+            <h3>Representational State Transfer</h3>
+            <h4>передача состояния представления</h4>
+        </section>
+        <section>
+            <h1>Требования к REST</h1>
+            <ul>
+                <li>Клиент-сервер</li>
+                <li>Отсутствие состояния</li>
+                <li>Кэширование</li>
+                <li>Единообразие интерфейса
+                    <ul style="font-size: 0.7em;">
+                        <li>Идентификация ресурсов</li>
+                        <li>Манипуляция ресурсами через представление</li>
+                        <li>«Самоописываемые» сообщения</li>
+                        <li>Гипермедиа (HATEOAS)</li>
+                    </ul>
+                </li>
+                <li>Слои</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Характеризуется</h1>
+            <table>
+                <tbody>
+                <tr>
+                    <td>метод запроса</td>
+                    <td>GET, POST, DELETE</td>
+                </tr>
+                <tr>
+                    <td>путь запроса</td>
+                    <td>/objects/list, /objects/100500</td>
+                </tr>
+                <tr>
+                    <td>тело запросв</td>
+                    <td>форма, json, xml</td>
+                </tr>
+                <tr>
+                    <td>код ответа</td>
+                    <td>200 OK, 404 NotFound</td>
+                </tr>
+                <tr>
+                    <td>тело ответа</td>
+                    <td>json, html, xml</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+        <section>
+            <h1>REST и Java</h1>
+            <ul>
+                <li>JAX-RS</li>
+                <li>Spring Framework</li>
+                <li>и другое</li>
+            </ul>
+        </section>
+        <section>
+            <h1>JAX-RS</h1>
+            <ul class="linone">
+                <li>Java API for RESTful Web Services</li>
+                <li>JavaEE</li>
+            </ul>
+        </section>
+        <section>
+            <h1>JAX-RS аннотации</h1>
+            <ul class="linone" style="color: #008000">
+                <li>@Path</li>
+                <li>@GET, @PUT, @POST, @DELETE, @HEAD</li>
+                <li>@Produces</li>
+                <li>@Consumes</li>
+            </ul>
+        </section>
+        <section>
+            <h1>JAX-RS аннотации</h1>
+            <ul class="linone" style="color: #008000">
+                <li>@PathParam</li>
+                <li>@QueryParam</li>
+                <li>@HeaderParam</li>
+                <li>@CookieParam</li>
+                <li>@FormParam</li>
+                <li>@DefaultValue</li>
+                <li>@Context</li>
+            </ul>
+        </section>
+        <section>
+            <h1>SpringFramework</h1>
+            <ul class="linone" style="color: #008000">
+                <li>@RequestMapping</li>
+                <li>@GetMapping, @PostMapping, @PutMapping, @PatchMapping, @DeleteMapping</li>
+            </ul>
+        </section>
+        <section>
+            <h1></h1>
+            <ul class="linone" style="color: #008000">
+                <li>@PathVariable</li>
+                <li>@RequestAttribute</li>
+                <li>@RequestBody</li>
+                <li>@RequestParam</li>
+                <li>@SessionAttribute(s)</li>
+            </ul>
+        </section>
+        <section>
+            <h1>JAX-RS пример</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+@Path("/greetings")
+public class JaxRsController {
+    @GET
+    @Path("/{name}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response greeting(@PathParam("name") String name) {
+        String greeting = "Hello " + name;
+        return Response.ok(greeting).build();
+    }
+}
+      </code></pre>
+        </section>
+        <section>
+            <h1>Spring пример 1</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+@RestController
+@RequestMapping("/greetings")
+public class SpringRestController {
+    @RequestMapping(method = RequestMethod.GET,
+                    value = "/{name}",
+                    produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity< ? > greeting(@PathVariable String name) {
+        String greeting = "Hello " + name;
+        return new ResponseEntity<>(greeting, HttpStatus.OK);
+    }
+}
+      </code></pre>
+        </section>
+        <section>
+            <h1>Spring пример 2</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+@RestController
+public class GreetingController {
+    @RequestMapping("/greeting")
+    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
+        return new Greeting("Hello " + name);
+    }
+}
+      </code></pre>
+        </section>
+        <section>
+            <h1>Spring пример. Клиент</h1>
+            <pre style="width:auto;"><code data-trim class="java">
+public static void main(String... args) {
+    RestTemplate restTemplate = new RestTemplate();
+    String message = restTemplate.getForObject("http://localhost/greetings/Bob", Sting.class);
+    log.info(message);
+    Greeting greeting = restTemplate.getForObject("http://localhost/greeting?name=Bob", Greeting.class);
+    // {"message": "Hello Bob"}
+    log.info(greeting.getMessage());
+}
+      </code></pre>
+        </section>
+        <section>
+            <h1>HATEOAS</h1>
+            <h3>Hypermedia as the Engine of Application State</h3>
+            <ul>
+                <li>клиент обращается к фиксированному URL</li>
+                <li>клиент может ничего не знать о сервере, кроме входящего URL</li>
+            </ul>
+        </section>        
+        <section>
+            <h1>HATEOAS пример</h1>
+            <pre style="width:auto;"><code data-trim class="json">
+{
+  "content":"Hello, User!",
+  "_links":{
+    "self":{
+      "href":"http://localhost:8080/greeting/User"
+    },
+    "farewell":{
+      "href":"http://localhost:8080/farewell/User"
+    }
+  }
+}
+      </code></pre>
+        </section>
+        <section>
+            <h1>gRPC</h1>
+            <ul class="linone">
+                <li>Google</li>
+                <li>Protocol Buffers v3</li>
+                <li>HTTP/2</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Protocol Buffers</h1>
+            <ul>
+                <li>протокол сериализации</li>
+                <li>проще, быстрее, однозначнее XML</li>
+                <li>необходима реализация под каждый язык</li>
+            </ul>
+        </section>
+        <section>
+            <h1>HTTP/2</h1>
+            <ul>
+                <li>только HTTPS</li>
+                <li>одно соединение для всех запросов</li>
+            </ul>
+        </section>
+        <section>
+            <h1>gRPC пример описания</h1>
+            <pre style="width:auto;"><code data-trim class="javascritp">
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
+</code></pre>
+        </section>
+        <section>
+            <h1>Типы gRPC</h1>
+            <ul>
+                <li>Unary RPC</li>
+                <li>Server streaming RPC</li>
+                <li>Client streaming RPC</li>
+                <li>Bidirectional streaming</li>
+            </ul>
+        </section>
+        <section>
+            <h1>Что есть еще в gRPC</h1>
+            <ul>
+                <li>балансировка</li>
+                <li>Interceptors</li>
+            </ul>
+        </section>
+        <section>
+            <h1>gRPC клиент</h1>
+<pre style="width:auto;"><code data-trim class="java">
+public class HelloWorldClient {
+  public static void main(String[] args) throws Exception {
+    ManagedChannel channel = ManagedChannelBuilder
+        .forAddress("localhost", 50051).usePlaintext().build();
+    GreeterGrpc.GreeterBlockingStub blockingStub = GreeterGrpc.newBlockingStub(channel);
+    try {
+      HelloRequest request = HelloRequest.newBuilder().setName(name).build();
+      HelloReply response;
+      try {
+        response = blockingStub.sayHello("Magaz");
+      } catch (StatusRuntimeException e) {
+        System.err.println("RPC failed: " + e.getStatus());return;
+      }
+      System.out.println("Greeting: " + response.getMessage());
+    } finally {
+      channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+  }
+}
+        </code></pre>
+        </section>
+<section>
+            <h1>gRPC сервер</h1>
+<pre style="width:auto;"><code data-trim class="java">
+import io.grpc.*;
+import io.grpc.stub.StreamObserver;
+import java.io.IOException;
+
+public class HelloWorldServer {
+  public static void main(String[] args) throws IOException, InterruptedException {
+    Server server = ServerBuilder.forPort(50051)
+            .addService(new GreeterImpl()).build().start();
+    server.awaitTermination();
+  }
+
+  static class GreeterImpl extends GreeterGrpc.GreeterImplBase {
+    @Override
+    public void sayHello(HelloRequest req, StreamObserver< HelloReply > responseObserver) {
+      HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + req.getName()).build();
+      responseObserver.onNext(reply);
+      responseObserver.onCompleted();
+    }
+  }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>JMS</h1>
+            <ul>
+                <li>Это не RPC</li>
+                <li>Является частью JDK</li>
+                <li>Топики</li>
+                <li>Очереди</li>
+            </ul>
+        </section>
+        <section>
+            <h1>JMS основа</h1>
+<pre style="width:auto;"><code data-trim class="java">
+import javax.jms.*;
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.ActiveMQConnectionFactory;
+class ConsumerOrProducer {
+    public static void main(String[] args) throws JMSException {
+        ConnectionFactory connectionFactory 
+          = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_BROKER_URL);
+        connection.start();
+        Session session = connection
+                      .createSession(false, Session.AUTO_ACKNOWLEDGE);
+        Destination destination = null;
+        if("QUEUE".equalsIgnoreCase(System.getProperties("amq"))) {        	
+        	destination = session.createQueue("LolQueue");	
+        }else{        	
+        	destination = session.createTopic("LolTopik");        	
+        }
+        /*
+        ........................................
+        */
+        connection.close();
+    }
+}
+        </code></pre>
+        </section>
+        <section>
+            <h1>JMS прием</h1>
+<pre style="width:auto;"><code data-trim class="java">
+MessageConsumer consumer = session.createConsumer(destination);
+String body;
+do {
+    Message msg = consumer.receive();
+    body = ((TextMessage) msg).getText();
+    
+    System.out.println("Received = "+body);
+    
+}while (!body.equalsIgnoreCase("GoHome!"));
+        </code></pre>
+        </section>
+        <section>
+            <h1>JMS отправка</h1>
+<pre style="width:auto;"><code data-trim class="java">
+        MessageProducer producer = session.createProducer(destination);
+Console c = System.console();
+String response;
+do {
+    
+    response = c.readLine("Enter message: ");
+    
+    TextMessage msg = session.createTextMessage(response);
+    producer.send(msg);
+    
+} while (!response.equalsIgnoreCase("GoHome!"));
+        </code></pre>
+        </section>
+        <section>
+            <h1>Конец</h1>
+            <h4>вопросы</h4>
+        </section>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: false,
+        progress: true,
+        history: true,
+        center: true,
+        slideNumber: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                    return !document.body.classList;
+                }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, condition: function () {
+                    return !!document.querySelector('pre code');
+                }, callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+    window.addEventListener("mousedown", handleClick, false);
+    window.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+    }, false);
+
+    function handleClick(e) {
+        e.preventDefault();
+        if (e.button === 0) Reveal.next();
+        if (e.button === 2) Reveal.prev();
+    }
+</script>
+
+</body>
+</html>

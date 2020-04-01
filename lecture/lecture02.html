@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>DevOps</title>
+
+        <meta name="description" content="Talk about java dev ops">
+        <meta name="author" content="Nagovitsin Maxim Dmitrievich">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+        <link rel="stylesheet" href="css/hljs/vs.css" id="highlight-theme">
+
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+
+        <style>
+            .reveal .slide-number {
+                font-size: 22pt;
+                color: black;
+            }
+    
+            .reveal pre {
+                background: none;
+                border: none;
+                box-shadow: none;
+            }
+    
+            .reveal pre code {
+                color: black;
+                background: none;
+                box-shadow: none;
+                max-height: none;
+            }
+    
+            .reveal section img {
+                border: none;
+                box-shadow: none;
+            }
+    
+            .reveal pre code {
+                overflow: hidden;
+            }
+    
+            .reveal .footer {
+                font-size: 22pt;
+                color: black;
+    
+                position: absolute;
+                left: 35%;
+                bottom: 0.5em;
+            }
+            .corp-name {
+                color: orangered;
+                font-family: "Circe", sans-serif;
+            }
+
+            /* .reveal .slides {
+                margin: 0 auto;
+            } */
+            
+            /* body {
+                transform: scale(.8) translateY(-135px);
+            } */
+
+            img {
+                transform: scale(.8)
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class="reveal">
+
+            <div class="footer">
+                <span class="corp-name"><b>NAUMEN </b></span>Наговицин Максим
+            </div>
+
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                    <h1>Промышленное приложение</h1>
+                    <p>
+                        <h3>это не только приложение</h3>
+                        <br/>
+                        <small>
+                        <a href="https://github.com/DonKeyHot1">Наговицин Максим</a> / <a href="mailto:mnagovitsin@naumen.ru">mnagovitsin@naumen.ru</a>
+                        <br/>
+                        <br/>
+                        <a href="https://naumen-student.github.io/EnterpriseJavaCourse-a2019/lecture/lecture02.html">Лекция 2</a>
+                        </small>
+                    </p>
+                </section>
+
+                <section>
+                        <h1>План</h1>
+                        <p>
+                            <ul>
+                                <li class="fragment"><b>VCS</b> (Version Control System/Система контроля версий)</li>
+                                <li class="fragment">Системы сборки приложений. <b>Maven</b>. <b>Gradle</b>.</li>
+                                <li class="fragment"><b>CI</b> (Continuous Integration/Система непрерывной интеграции) <b>Jenkins</b></li>
+                                <li class="fragment">VCS-Хостинги. <b>Github</b></li>
+                                <li class="fragment">Система развертывания и управления контейнерами <b>Openshift</b></li>
+                            </ul>
+                        </p>
+                    </section>
+
+                    <section>
+                        <h1>Version Control Systems</h1>
+                        <h2>git</h2>
+                        <img src="img/02/git_logo.png" style="width:500px; transform: scale(.3) translateY(-700px);"/>
+                    </section>
+
+                    <section>
+                        <h1>Version Control Systems</h1>
+                        <h3>Основные понятия:</h3>
+                        <ul>
+                            <li class="fragment">Репозиторий</li>
+                            <li class="fragment">Коммит</li>
+                            <li class="fragment">Версия/Состояние/Ревизия</li>
+                        </ul>
+                    </section>
+
+                <section>
+                    <h1>Version Control Systems</h1>
+                    <h3>Зачем?</h3>
+                    <p>
+                        <ul>
+                            <li class="fragment">Чтобы видеть историю изменений</li>
+                            <li class="fragment">Переключаться между состояниями документов</li>
+                            <li class="fragment">Удобно вести совместную работу</li>
+                            <li class="fragment">Увидеть автора и дату создания версии</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Два типа VCS</h1>
+                    <p>
+                        <ul>
+                            <li class="fragment">Централизованные VCS: CVS, Subversion(SVN)</li>
+                            <li class="fragment">Распределенные VSC: Git, Mercurial(Hg), BitKeeper, Bazaar</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Централизованные VCS</h1>
+                    <div class="fragment">
+                        <p> Достоинства
+                            <ul>
+                                <li>Всё хранится на сервере</li>
+                                <li>Централизованная блокировка изменений</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div class="fragment">
+                        <p> Недостатки
+                            <ul>
+                                <li>Невозможно работать без доступа к серверу</li>
+                                <li>Один сервер - уникальная точка отказа</li>
+                            </ul>
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                    <h1>Распределенные VCS</h1>
+                    <div class="fragment">
+                        <p> Достоинства
+                            <ul>
+                                <li>Практически невозможно потерять репозиторий</li>
+                                <li>Работа с версиями не зависит от доступности сервера</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div class="fragment">
+                        <p> Недостатки
+                            <ul>
+                                <li>Невозможны централизованные блокировки файлов</li>
+                            </ul>
+                        </p>
+                    </div>
+                </section>
+
+                <section>
+                        <h1>Git: появление</h1>
+                        <p>
+                            <ul>
+                                <li class="fragment">Linux</li>
+                                <li class="fragment">BitKeeper</li>
+                                <li class="fragment">Линус Торвальдс и сообщество</li>
+                            </ul>
+                        </p>
+                        <p class="fragment">
+                            Подробнее тут:
+                            <a href="https://git-scm.com/book/ru/v2">https://git-scm.com/book/ru/v2</a>
+                        </p>
+                </section> 
+                
+                <section>
+                        <h2>Ветки / branch</h2>
+                        <img src="img/02/git_branches4.png" style="width:500px; height: 550px;"/>
+                </section>
+
+                <section>
+                    <h2>Ветки / branch</h2>
+                    <img src="img/02/git_branches5.png" style="width:300px; height: 550px;"/>
+                </section>
+
+                <section>
+                    <h2>Ветки / branch</h2>
+                    <img src="img/02/git_branches6.png" style="width:400px; height: 550px;"/>
+                </section>
+
+                <section>
+                    <h2>Ветки / branch</h2>
+                    <img src="img/02/git_branches3.png" style="width:500px; height: 550px; transform: scaleX(1.2)"/>
+                </section>
+                
+                <section>
+                    <h1>Git: cheat sheet</h1>
+                    <p>
+                        <ul>
+                            <li>git clone ${url}</li>
+                            <li>git checkout -b ${branchName}</li>
+                            <li>Do work</li>
+                            <li>git add .</li>
+                            <li>git commit -m '${messageAboutCommit}'</li>
+                            <li>git push origin ${branchName}</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Системы сборки</h1>
+                </section>
+
+                <section>
+                        <h1>Нет системы сборки</h1>
+                        <pre style="width:auto;"><code data-trim class="java">
+class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World!");
+    }
+}
+                        </code></pre>
+                        <pre style="width:auto;"><code data-trim class="bash">
+$ javac HelloWorld.java
+$ java HelloWorld
+                        </code></pre>
+                </section>
+                <section>
+                        <h1>Больше кода</h1>
+                        <pre style="width:auto;"><code data-trim class="java">
+class HelloWorld {
+    public static void main(String[] args) {
+        Printer.print("Hello World!");
+    }
+}
+
+class Printer {
+    public static void print(String text) {
+        System.out.println(text);
+    }
+}
+                        </code></pre>
+                        <pre style="width:auto;"><code data-trim class="bash">
+$ javac Printer.java HelloWorld.java
+$ java HelloWorld
+                        </code></pre>
+                </section>
+
+                <section>
+                    <h1>Система сборки. Требования</h1>
+                    <p>
+                        <ul>
+                            <li>Сборка вне IDE</li>
+                            <li>Запуск тестов</li>
+                            <li>Особая структура файлов</li>
+                            <li>Зависимости</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Системы сборки для Java</h1>
+                    <p>
+                        <ul>
+                            <li>Maven</li>
+                            <li>Gradle</li>
+                            <li>Ant</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Maven</h1>
+                    <p> Одна из самых популярных систем сборки
+                        <br/>
+                        <a href="https://maven.apache.org">https://maven.apache.org</a>
+                        <ul>
+                            <li>описание проекта в файле pom.xml</li>
+                            <li>сделан для сборки в Java</li>
+                            <li>всегда один выход: Jar, war, ear...</li>
+                            <li>много plugin-ов</li>
+                            <li>у цикла жизни много фаз</li>
+                        </ul>
+                    </p>
+                </section>
+                
+                <section>
+                    <h1>Структура проекта</h1>
+                    <img src="img/02/maven_projecT_structure.png" style="width:auto; height:500px"/>
+                </section>
+
+                <section>
+                    <h1>Maven артефакт</h1>
+                    <ul>
+                        <li>groupId <cite>ru.naumen</cite></li>
+                        <li>artifactId <cite>cti</cite></li>
+                        <li>version <cite>4.8.0</cite></li>
+                        <li>excludes</li>
+                    </ul>
+                </section>
+                <section>
+                        <h1>Структура pom.xml</h1>
+                        <pre style="width:auto;"><code data-trim class="xml">
+<project>
+    <groupId>ru.urfu.matmex</groupId>
+    <artifactId>simple</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <name>Simple Project</name>
+...
+</project>
+                        </code></pre>
+                </section>
+
+                <section>
+                        <h1>Зависимости</h1>
+                        <pre style="width:auto;"><code data-trim class="xml">
+<project>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        
+    </dependencies> 
+    ...
+</project>
+                        </code></pre>
+                </section>
+                <section>
+                        <h1>Объявление переменных</h1>
+                        <pre style="width:auto;"><code data-trim class="xml">
+<project>
+    <properties> 
+        <beanutils.version>1.8.3</beanutils.version> 
+    </properties>
+    ...
+</project>
+                        </code></pre>
+                </section>
+                <section>
+                        <h1>Зависимость</h1>
+                        <pre style="width:auto;"><code data-trim class="xml">
+<project>
+    <properties> 
+        <beanutils.version>1.8.3</beanutils.version> 
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>beanutils</artifactId>
+            <version>${beanutils.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+</project>
+                        </code></pre>
+                </section>
+                <section>
+                    <h1>Транзитивные зависимости</h1>
+                    <img src="img/02/transitive_dependency.png">
+                </section>
+
+                <section>
+                        <h1>Gradle</h1>
+                        <p>Еще одна популярная система сборки</p>
+                        <p><a href="https://gradle.org">https://gradle.org</a></p>
+                        <ul>
+                            <li>Описание проекта на языке Groovy или Kotlin (DSL)</li>
+                            <li>Стандартный способ конфигурации сборки при разработке на Android</li>
+                        </ul>
+                </section>
+
+                <section>
+                    <h1>Структура проекта</h1>
+                    <img src="img/02/gradle_structure.png" style="height: 500px; width: 500px;" >
+                </section>
+
+                <section>
+                    <h1>Описание проекта</h1>
+                    <pre style="width:auto;">
+                        <code data-trim class="groovy">
+apply plugin:'java'
+apply plugin:'checkstyle'
+apply plugin:'findbugs'
+apply plugin:'pmd'
+version = '1.0'
+repositories {
+    mavenCentral()
+}
+dependencies {
+    testCompile group:'junit', name:'junit', version:'4.11'
+}
+                        </code>
+                    </pre>
+                </section>
+
+                <section>
+                    <h1>Система непрерывной интеграции</h1>
+                    <h2>Jenkins</h2>
+                </section>
+
+                <section>
+                    <h1>Система непрерывной интеграции</h1>
+                    <ul>
+                        <li class="fragment">Рутина</li>
+                        <li class="fragment">Плохой код в репозитории</li>
+                        <li class="fragment">Проблемы окружения</li>
+                        <li class="fragment">История сборок</li>
+                        <li class="fragment">Много-много тестов</li>
+                    </ul>
+                </section>
+                <section>
+                    <h1>Рутина</h1>
+                    <pre style="width:auto;"><code data-trim class="bash">
+mvn clean install
+cp target/artifact.war ../tomcat/webapps
+../tomcat/bin/startup.sh
+mvn test
+...
+git checkout develop
+git merge ${branchName}
+git push origin develop
+                    </code></pre>
+                </section>
+                <section>
+                    <h1>Плохой код</h1>
+                    <table>
+                        <tr>
+                            <td>"Плохой" разработчик</td>
+                            <td>"Хороший" разработчик</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <pre style="width:auto;"><code data-trim class="bash">
+# Завтра в отпуск
+git checkout master
+# Надо срочно доделать задачу
+git commit -am 'Killer feature'
+git push origin master
+# Наконец-то отпуск!
+                                </code></pre>
+                            </td>
+                            <td>
+                                <pre style="width:auto;"><code data-trim class="bash">
+git checkout master
+git pull
+mvn clean install
+...
+BUILD FAILED
+                                </code></pre>
+                            </td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <h1>Проблемы окружения</h1>
+                    <table>
+                        <tr>
+                            <td>Твой компьютер</td>
+                            <td>Не твой компьютер</td>
+                        </tr>
+                        <tr>
+                            <td><img src="img/02/your_pc.png"/></td>
+                            <td><img src="img/02/not_your_pc.png" /></td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <h1>История сборок</h1>
+                    <table>
+                        <tr>
+                            <td><img src="img/02/build_history.png"/></td>
+                            <td><img src="img/02/build_info.png" /></td>
+                        </tr>
+                    </table>
+                </section>
+                <section>
+                    <h1>Много тестов</h1>
+                    <div>over 9000 тестов, 24 дочерних узла</div>
+                    <img src="img/02/many_tests.png"/>
+                </section>
+                <section>
+                    <h1>Цикл разработки</h1>
+                    <img src="img/02/develop_cycle.png" />
+                </section>
+                <section>
+                    <h1>CI Jenkins</h1>
+                    <ul>
+                        <li>Быстро находит ошибки</li>
+                        <li>Тестирует весь код</li>
+                        <li>Обеспечивает наличие стабильной версии кода</li>
+                        <li>Повышает качество</li>
+                    </ul>
+                </section>
+                <section>
+                    <h1>Jenkins. Общий вид</h1>
+                    <img src="img/02/ci_diagram.png"/>
+                </section>
+                <section>
+                    <h1>Наш цикл интеграции</h1>
+                    <ul>
+                        <li>Триггер (расписание, git) </li>
+                        <li>Сборка</li>
+                        <li>Статический анализ</li>
+                        <li>Unit тестирование</li>
+                        <li>DB-тестирование</li>
+                        <li>Interface-тесты (Selenium)</li>
+                        <li>Сохранение</li>
+                        <li>Отчет</li>
+                    </ul>
+                </section>
+                
+                <section>
+                    <h1>Github</h1>
+                    <p>
+                        <a href="https://github.com">Весь код интернета</a>
+                    </p>
+                    <p>
+                        Аналоги
+                        <ul>
+                            <li>BitBucket</li>
+                            <li>GitLab</li>
+                            <li>Google code</li>
+                            <li>Microsoft Codeplex</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section>
+                    <h1>Github flow</h1>
+                    <ul>
+                        <li>Fork репозитория</li>
+                        <li>Создание ветки</li>
+                        <li>Коммит</li>
+                        <li>Pull request</li>
+                        <li>Merge</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>GitHub. Инструменты</h1>
+                    <ul>
+                        <li>CodeShip</li>
+                        <li>Codacy / Codeclimate</li>
+                        <li>JitPack</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>Развертывание</h1>
+                    <ul>
+                        <li>Запуск на железе</li>
+                        <li>Запуск на виртуальной машине</li>
+                        <li>Запуск в контейнере</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>Запуск на железе</h1>
+                    <div class="fragment">
+                        <p>Плюсы</p>
+                        <ul>
+                            <li>Простота</li>
+                            <li>Доступность</li>
+                        </ul>
+                    </div>
+                    <div class="fragment">
+                        <p>Минусы</p>
+                        <ul>
+                            <li>Что если сгорит?</li>
+                            <li>Что если не хватит мощности?</li>
+                        </ul>
+                    </div>
+                    
+                </section>
+
+                <section>
+                    <h1>Запуск в VM</h1>
+                        <p>Полная эмуляция железа</p>
+                        <div class="fragment">
+                            <p>Плюсы</p>
+                            <ul>
+                                <li>Надежность</li>
+                                <li>Переносимость</li>
+                            </ul>
+                        </div>
+                        <div class="fragment">
+                            <p>Минусы</p>
+                            <ul>
+                                <li>Накладные расходы</li>
+                            </ul>
+                        </div>
+                </section>
+                
+                <section>
+                    <h2>Запуск в контейнере (Docker)</h2>
+                    <p>Псевдо эмуляция железа - изоляция приложений</p>
+                    <div class="fragment">
+                        <p>Плюсы</p>
+                        <ul>
+                            <li>Надежность</li>
+                            <li>Переносимость</li>
+                        </ul>
+                    </div>
+                    <div class="fragment">
+                        <p>Минусы</p>
+                        <ul>
+                            <li>Меньшие, но все же накладные расходы</li>
+                        </ul>
+                    </div>                
+                </section>
+
+                <section>
+                    <h1>Лучшего варианта нет</h1>
+                </section>
+                
+                <section>
+                    <h1>Cloud провайдеры</h1>
+                    <ul>
+                        <li>Openshift</li>
+                        <li>MS Azure / AWS</li>
+                        <li>Heroku</li>
+                        <li>Яндекс.Облако</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>Ссылки</h1>
+                    <ul>
+                        <li>Презентация: <a href="https://naumen-student.github.io/EnterpriseJavaCourse-a2019/lecture/lecture02.html">https://naumen-student.github.io/EnterpriseJavaCourse-a2019/lecture/02.html</a></li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+
+            // Full list of configuration options available at:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: false,
+                progress: true,
+                history: true,
+                center: true,
+                slideNumber: true,
+                zoomKey: 'shift',
+        
+                transition: 'slide', // none/fade/slide/convex/concave/zoom
+        
+                // Optional reveal.js plugins
+                dependencies: [
+                    {
+                        src: 'lib/js/classList.js', condition: function () {
+                            return !document.body.classList;
+                        }
+                    },
+                    {
+                        src: 'plugin/markdown/marked.js', condition: function () {
+                            return !!document.querySelector('[data-markdown]');
+                        }
+                    },
+                    {
+                        src: 'plugin/markdown/markdown.js', condition: function () {
+                            return !!document.querySelector('[data-markdown]');
+                        }
+                    },
+                    {
+                        src: 'plugin/highlight/highlight.js', async: true, condition: function () {
+                            return !!document.querySelector('pre code');
+                        }, callback: function () {
+                            hljs.initHighlightingOnLoad();
+                        }
+                    },
+                    {src: 'plugin/zoom-js/zoom.js', async: true},
+                    {src: 'plugin/notes/notes.js', async: true}
+                ]
+            });
+        
+            window.addEventListener("mousedown", handleClick, false);
+            window.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+            }, false);
+        
+            function handleClick(e) {
+                e.preventDefault();
+                if (e.button === 0) Reveal.next();
+                if (e.button === 2) Reveal.prev();
+            }
+        </script>
+
+    </body>
+</html>

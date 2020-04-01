@@ -3,11 +3,11 @@
 
 ## Слайды лекций
 * Лекция 1. Вводная лекция
-* Лекция 2. Промышленное приложение
+* Лекция 2. [Промышленное приложение](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture02.html)
 * *Практика 1.*
-* Лекция 3. Работа с базами данных
-* Лекция 4. RPC или социализация приложений
-* Лекция 5. Инверсия управления
+* Лекция 3. [Работа с базами данных](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture03.html)
+* Лекция 4. [RPC или социализация приложений](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture04.html)
+* Лекция 5. [Инверсия управления](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture05.pdf)
 * *Практика 2.*
 * Лекция 6. Многопоточность и JAVA
 * Лекция 7. JVM: управление памятью. GC
