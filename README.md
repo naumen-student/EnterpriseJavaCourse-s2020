@@ -9,8 +9,8 @@
 * Лекция 4. [RPC или социализация приложений](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture04.html)
 * Лекция 5. [Инверсия управления](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture05.html)
 * *Практика 2.*
-* Лекция 6. Многопоточность и JAVA
-* Лекция 7. JVM: управление памятью. GC
+* Лекция 6. [JVM: управление памятью. GC](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture06.pdf)
+* Лекция 7. [Многопоточность и JAVA](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture07.html)
 * *Практика 3.*
 * Лекция 8. Tooling
 * Лекция 9. Архитектура корпоративных приложений
