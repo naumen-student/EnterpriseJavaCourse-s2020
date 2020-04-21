@@ -1,0 +1,1686 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Многопоточность и JAVA</title>
+
+    <meta name="description" content="Многопоточность и JAVA">
+    <meta name="author" content="NAUMEN, Павел Зыков">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+    <link rel="stylesheet" href="css/hljs/vs.css" id="highlight-theme">
+
+    <!-- Printing and PDF exports -->
+    <script>
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+        document.getElementsByTagName('head')[0].appendChild(link);
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <style>
+        .reveal .slide-number {
+            font-size: 22pt;
+            color: black;
+        }
+
+        .reveal pre {
+            background: none;
+            border: none;
+            box-shadow: none;
+        }
+
+        .reveal pre code {
+            color: black;
+            background: none;
+            box-shadow: none;
+            max-height: none;
+            overflow: hidden;
+        }
+
+        .reveal pre code.small {
+            font-size: 8pt;
+            line-height: normal;
+        }
+
+        .reveal pre code.medium {
+            font-size: 10pt;
+            line-height: normal;
+        }
+
+        .reveal section img {
+            border: none;
+            box-shadow: none;
+            max-width: 70%
+        }
+
+        .reveal .footer {
+            font-size: 22pt;
+            color: black;
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            bottom: 0.5em;
+        }
+
+        .reveal .cartoon {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+        }
+
+        .reveal .rubber_stamp {
+            font-family: 'Vollkorn', serif;
+            font-size: 39px;
+            line-height: 45px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: red;
+            border: 7px solid red;
+            float: left;
+            padding: 10px 7px;
+            border-radius: 10px;
+
+            opacity: 0.8;
+            -webkit-transform: rotate(-10deg);
+            -o-transform: rotate(-10deg);
+            -moz-transform: rotate(-10deg);
+            -ms-transform: rotate(-10deg);
+            position: absolute;
+            bottom: 20%;
+            right: 1%;
+        }
+
+        .reveal .rubber_stamp::after {
+            position: absolute;
+            content: " ";
+            width: 100%;
+            height: auto;
+            min-height: 100%;
+            top: -10px;
+            left: -10px;
+            padding: 10px;
+            background: url(img/04/noise.png) repeat;
+        }
+
+        .reveal .nau {
+            color: orangered;
+            font-weight: bold;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="reveal">
+    <div class="footer">
+        <span class="nau">NAUMEN</span> Павел Зыков
+    </div>
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section>
+            <h1>Многопоточность</h1>
+            <h2>и</h2>
+            <h1>JAVA</h1>
+            <aside class="notes">
+                Многопоточность это одна из самых сложный для понимания тем в программировании.
+                За всю свою практику, наверно процентов 80 от всех холиваров, которые я видел или участвовал были о
+                многопоточном коде.
+                Так, ну давайте начинать.
+            </aside>
+        </section>
+        <section>
+            <h2>Что такое процесс?</h2>
+            <p><b>Процесс</b> — экземпляр программы во время выполнения, независимый объект, которому выделены системные
+                ресурсы (например, процессорное время и память). Каждый процесс выполняется в отдельном адресном
+                пространстве: один процесс не может получить доступ к переменным и структурам данных другого. Если
+                процесс хочет получить доступ к чужим ресурсам, необходимо использовать межпроцессное взаимодействие.
+            </p>
+            <aside class="notes">
+                <p>Начнем с начала - с определений - Что такое процесс?</p>
+                <p>Грубо говоря процесс это одно отдельно запущеное приложение.</p>
+                <p>Процессу выделены какие-те ресурсы и он живет в своем отдельном адресном пространсте и никто в его
+                    домик проникнуть не может.</p>
+                <p>Если ему или другим процессам понадобится обмениваться данными им придется использовать межпроцесные
+                    взаимодействия: например файл, сокет, канал, файл в памяти, очередь сообщений или RPC</p>
+            </aside>
+        </section>
+        <section>
+            <h2>Что такое поток?</h2>
+            <p><b>Поток</b> использует то же самое пространства стека, что и процесс, а множество потоков совместно
+                используют данные своих состояний. Каждый поток может работать (читать и писать) с одной и той же
+                областью памяти, в отличие от процессов, которые не могут просто так получить доступ к памяти другого
+                процесса. У каждого потока есть собственные регистры и собственный стек, но другие потоки могут их
+                использовать.</p>
+            <p></p>
+            <aside class="notes">
+                Поток "живет" внутри процесса и у всех потоков одного процесса общая память.
+                К примеру при создании потоков вы можете передать в них общую переменную и работать сней в разных
+                потоках одновременно.
+            </aside>
+        </section>
+        <section>
+            <h2>Процессы и потоки</h2>
+            <img src="img/04/processes_and_threads.png">
+            <aside class="notes">
+                Вот тут мы видим упрощенную схему того как приложения выполняются на комьютере. Процессы имеют разные
+                области памяти, которые как-то мапятся на физическую память, потоки живут внутри процесса и имеют
+                какие-то свои данные и стек. К этой картинке мы еще вернемся, а пока идем дальше
+            </aside>
+        </section>
+        <section>
+            <h2>Как представлен поток в JAVA?</h2>
+            <ul>
+                <li><b>Поток</b> — объект у класса которого есть методы run() и start()</li>
+                <li>После вызова метода start(), <i>через какое-то время</i> будет вызван run()</li>
+                <li>Метод run() будет выполнен в своем стеке.</li>
+            </ul>
+            <aside class="notes">
+                В Java поток - это конечно же объект. У которого есть методы run() и start(). И что бы запустить поток
+                нам нужно у нашего объекта потока позвать метод start() и через некторое время в отдельном потоке будет
+                запущен метод run()
+            </aside>
+        </section>
+        <section>
+            <h2>Роль операционной системы</h2>
+            <img src="img/04/processes_and_threads.png">
+            <aside class="notes">
+                Вот этим "через некоторое время будет запущем метод run()" занимается операционная система, а точнее её
+                планировщик потоков, который переключает контексты исполнения, раскладывая потоки на реальные ядра. То
+                есть,
+                когда мы вызываем у нашего объекта поток метод start(), мы говорим операционной системе:"Запусти
+                пожалуста код, что находится в методе run() в отдельном потоке" и она спустя какое-то время это делает
+            </aside>
+        </section>
+        <section>
+            <h2>Роль операционной системы</h2>
+            <ul>
+                <li>Создает потоки</li>
+                <li>Переключает потоки</li>
+                <li>API для уведомления потока</li>
+            </ul>
+            <aside class="notes">
+                И так вот три ключевых момента за которые отвечает операционка в данном контексте:
+                *она создает потоки
+                *она передает управление от одного потока другому, взависимости от их приоритетов
+                *предоставляет апи для уведомления потока о каком-то событии
+            </aside>
+        </section>
+        <section>
+            <h2>Запуск потоков</h2>
+            <img src="img/04/threads_timeline.png">
+            <aside class="notes">
+                На данной картинке мы видим как происходит запуск потоков во времени. Запускать потоки мы можем в любом
+                месте кода, один поток может породить другой(что здесь и происходит). На этой картинке всё понятно и
+                предсказуемо.
+            </aside>
+        </section>
+        <section>
+            <h2>Порядок не определен!</h2>
+            <img src="img/04/threads_timeline2.png">
+            <aside class="notes">
+                Но вот на этой уже проглядывается проблема, операционная система нам не гарантирует, что потоки будут
+                запущены, в той последовательности в которой мы звали методы start. Если вам понадобится, что бы разные
+                потоки выполняли работу в нужной вам последовательности придется приложить дополнительные усилия
+            </aside>
+        </section>
+        <section>
+            <h2>Java Concurrency</h2>
+            <p>В Java есть два пути разрабоки многопоточных приложений:</p>
+            <ul>
+                <li>Сделать всё руками: Thread, Runable, wait/notify, synchronized</li>
+                <li>Использовать высокоуровневое API: java.utils.concurrent</li>
+            </ul>
+            <aside class="notes">
+                Ну а мы тут всё таки собрались, что бы говорить о JAVA. Разработчики языка Java позаботились о нас и
+                дали нам довольно богатое API для написания многопоточных приложений которое включает в себя
+                потокобезопасные структуры данных, средства синхронизации и средства порождения потоков. Ну и конечно же
+                нам оставили возможность всё сделать руками. Мы сегодня посмотрим, и на, то и на другое.
+            </aside>
+        </section>
+        <section>
+            <h2>Как создать поток?</h2>
+            <p>Реализовать интерфейс Runnable</p>
+            <pre style="width:auto;"><code data-trim class="java">
+// Создание потока
+Thread t = new Thread(new Runnable() {
+    public void run() {
+        System.out.println("Hello world!");
+    }
+});
+// Запуск потока
+t.start();
+                    </code></pre>
+            <aside class="notes">
+                Потоки в JAVA, можно создать двумя способами - первый реализовать интерфейс Runnable и передать его в
+                консруктор потока
+            </aside>
+        </section>
+        <section>
+            <h2>Как создать поток?</h2>
+            <p>Наследовать класс Thread</p>
+            <pre style="width:auto;"><code data-trim class="java">
+// Создание потока
+Thread t = new Thread() {
+    public void run() {
+        System.out.println("Hello world!");
+    }
+};
+// Запуск потока
+t.start();
+                    </code></pre>
+            <aside class="notes">
+                Или же мы можем наследовать класс Thread и переопределить у него метод run
+            </aside>
+        </section>
+        <section>
+            <h2>Thread vs Runnable</h2>
+            <ul>
+                <p><b>Runnable</b></p>
+                <ul>
+                    <li>Можно наследовать класс отличный от Thread</li>
+                    <li>Нужно передавать в конструктор Thread</li>
+                </ul>
+                <p><b>Thread</b></p>
+                <ul>
+                    <li>Содержит методы упраления потоком</li>
+                </ul>
+                <p><b>Thread thread = Thread.currentThread()</b></p>
+                <ul>
+                    <li>Объект текущего потока можно получить из любого места кода</li>
+                </ul>
+            </ul>
+
+            <aside class="notes">
+                Какие преимущества есть у каждого метода?
+                Используя Runnable мы имеем все преимущества того, что это интерфейс, мы можем наследовать какой-то
+                класс и выносить в него часть общей логики.
+                Используя Thread мы имеем доступ к методам управления потоком.
+                Однако это преимущество сомнительно т.к. мы можем получить объект текущего потока откуда угодно
+            </aside>
+        </section>
+        <section>
+            <h2>Класс Thread</h2>
+            <p>Некоторые методы:</p>
+            <pre style="width:auto;"><code data-trim class="java">
+long getId()
+String getName()
+void setName(String name)
+int getPriority()
+void setPriority(int priority)
+static void yield()
+static void sleep(long ms)
+void interrupt()
+static boolean interrupted()
+void join()
+
+                    </code></pre>
+            <div class="cartoon fragment"><img src="img/04/threads_and_kitten.png"/></div>
+            <aside class="notes">
+                Здесь перечислены основные методы класса Thread
+                Первые три метода пожалуй самые полезные - именно они не позволят вам запутаться в нитях, как этот
+                котенок.
+                Первый возвращает идентификатор потока, логируйте его и это моможет углядеть поледовательность действий
+                в рамках одного потока. В лайоуте log4j помоему есть возможность его логировать прямо из коробки. Потоку
+                также можно задавать имя, рекоммендую менять его в зависимости от изменения работы которую выполняет
+                поток. Потом расследуя неожиданное поведение системы по стекам потоков это может очень пригодится.
+                Следущие два метода связаны с приоритетом потока, это тот самый приоритет по которому операционная
+                система решает, какому потоку отдать управление. По умолчанию 5, может принимать значения от 0 до 10.
+                yield предназначен для того, что бы сказать системе "Я не хочу исполняться, иди отдай управление
+                другим."
+                Про остальные методы я расскажу по ходу пьесы.
+            </aside>
+        </section>
+        <section>
+            <h2>Прерывания</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+thread.interrupt(); //прервать поток thread
+                    </code></pre>
+            <aside class="notes">
+                interrupt, вызвав этот метод у объекта поток, мы посылаем потоку прерывание. Поток при это не прекращает
+                свое выполнение, он просто получает сигнал о том, что ему нужно прерваться. Это так, потому что он может
+                заниматься довольно важной работой и нужно сперва её завершить. Согласитесь было бы печально, если бы
+                поток переводящий ваши деньги с одного счета на другой оставит ваши деньги где то посередине получив
+                прерываение. Так вот, прерывания нужно обрабатывать, посмотрим как это делатть.
+            </aside>
+        </section>
+        <section>
+            <h2>Прерывания</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+try{
+    Thread.sleep(5000);
+}
+catch(InterruptedException e){ //нас прервали
+
+    return;
+}
+                    </code></pre>
+            <aside class="notes">
+                Случае всяких ожиданий, например в случае обычного sleep'а если потоку послать прервания sleep выкинет
+                исключение, поймав которое мы должны, закончить свою работу (должны, но не обязаны)
+            </aside>
+        </section>
+        <section>
+            <h2>Прерывания</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+for(int i = 0; i< inputs[i];i++){
+    heavyTask(inputs[i]);
+    if(Thread.interrupted()){ //нас прервали
+        return;
+    }
+}
+                    </code></pre>
+            <aside class="notes">
+                В случае если мы в потоке выполняем какие-то сложные вычисления в цикле, то хороши тоном будет
+                проверить, не прервали ли нас и если это так, то выйти из цикла
+            </aside>
+        </section>
+        <section>
+            <h2>Состояния потоков</h2>
+            <img src="img/04/thread_states.png"/>
+            <aside class="notes">
+                На данной схеме мы видим все состояния в которых может находится объект поток.
+                Сразу после создания поток находится в состояниии new, после вызова метода start он переходит в
+                Runnable, который заключает в себе два статуса ready - поток в очереди планировщика потоков и running
+                поток исполняется прямо сейчас. Вызываю другие методы мы сможем переводить поток в оставшиеся статусы.
+            </aside>
+        </section>
+        <section>
+            <h2>Классические задачи многопоточного программирования</h2>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <aside class="notes">
+                На следующем слайде и далее я буду рассказывать о классических задачах многопоточного программирования.
+                Я это буду делать перед тем как рассказать о каком-то механизме который будет решать эту задачу.
+                Они будут помечаться вот таким значком.
+            </aside>
+        </section>
+        <section>
+            <h2>Задача доступа к общему ресурсу</h2>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <ul>
+                <li>Несколько потоков обращаются к общему ресурсу</li>
+            </ul>
+            <img src="img/04/shared_resource.png"/>
+            <aside class="notes">
+                Самая распространенная - обращение к общему ресурсу. Есть ресурс, есть много потоков, нужно, чтобы
+                потоки не подрались и чтобы не попортили ресурс. Все остальные задачи впринципе можно воспринимать, как
+                частный случай этой.
+            </aside>
+        </section>
+        <section>
+            <h2>Счетчик</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class UnsafeCounter implements Counter{
+    private int counter = 0;
+
+    @Override
+    public int get(){
+        return counter;
+    }
+
+    @Override
+    public void increment(){
+        counter++;
+    }
+
+    @Override
+    public void reset(){
+        counter = 0;
+    }
+
+}
+                    </code></pre>
+            <aside class="notes">
+                Рассмотрим пример, в нашем случае ресурсом будет счетчик. Он очень простой и непотокобезопасный.
+                Посмотрим как он будет ломаться.
+            </aside>
+        </section>
+        <section>
+                    <pre style="width:auto;"><code data-trim class="java small">
+public class ExperimentRunner{
+    private int threadsNumber;
+    private int experimentsNumber;
+    private int repeatsNumber;
+
+    public ExperimentRunner(int threadsNumber, int experimentsNumber, int repeatsNumber){
+        this.threadsNumber = threadsNumber;
+        this.experimentsNumber = experimentsNumber;
+        this.repeatsNumber = repeatsNumber;
+    }
+
+    public void runExperiments(Counter counter){
+        long totalTime = 0;
+        System.out.format("Counter '%s':\n", counter.getClass().getName());
+        for (int i = 0; i < experimentsNumber; i++){
+            long startTime = System.currentTimeMillis();
+            runExperiment(counter);
+            long elapsed = (System.currentTimeMillis() - startTime);
+            totalTime += elapsed;
+            System.out.format(" Experiment [%d/%d]:\tvalue = %d time = %d ms\n", i + 1, experimentsNumber,
+                    counter.get(), elapsed);
+            counter.reset();
+        }
+        System.out.format(" Average time:\t%d ms\n", totalTime / experimentsNumber);
+    }
+
+    private void runExperiment(Counter counter){
+        Runnable experiment = () -> {
+            for (int i = 0; i < (repeatsNumber / threadsNumber); i++){
+                counter.increment();
+            }
+        };
+
+        List&lt;Thread&gt; threads = Stream.generate(() -> new Thread(experiment)).limit(threadsNumber)
+                .collect(Collectors.toList());
+
+        threads.forEach(t -> t.start());
+        threads.forEach(t -> {
+            try{
+                t.join();
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        });
+    }
+}
+                    </code></pre>
+            <aside class="notes">
+                Ломать мы его будем при помощи вот такого кода. Это класс в конструктор, которого мы передаем количество
+                потоков, количество экспериментов и количество инкрементов счетчика которое нужно выполнить.
+                Вот этот метод запускает экперимент N раз засекает время и считает среднее время выполнения и выводит
+                результат. На код эксперимента посмотрим подробнее.
+            </aside>
+        </section>
+        <section>
+            <h2>Запуск эксперимента</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+private void runExperiment(Counter counter){
+    Runnable experiment = () -> {
+        for (int i = 0; i < (repeatsNumber / threadsNumber); i++){
+            counter.increment();
+        }
+    };
+
+    List&lt;Thread&gt; threads = Stream.generate(() -> new Thread(experiment))
+            .limit(threadsNumber).collect(Collectors.toList());
+
+    threads.forEach(t -> t.start());
+    threads.forEach(t -> {
+        try{
+            t.join();
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    });
+}
+                    </code></pre>
+            <aside class="notes">
+                Здесь мы создаем Runnable, который будет инкрементировать счетчик, создаем N потоков, запускаем их, и
+                ждем когда они закончат свое выполение. И что мы тут видим? Я обработал InterruptedException, как
+                ушлепок.
+            </aside>
+        </section>
+
+        <section>
+            <h2>Счетчик</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public static void main(String[] args)
+{
+    Counter counter = new UnsafeCounter();
+    ExperimentRunner runner = new ExperimentRunner(4, 5, 100_000_000);
+    runner.runExperiments(counter));
+}
+                    </code></pre>
+            <aside class="notes">
+                Запустим наш эксперимент на 4 потоках, повторим 5 раз и поинкрементим счетчик 100 миллионов раз.
+            </aside>
+        </section>
+
+        <section>
+            <h2>Счетчик</h2>
+            <pre>
+Counter 'ru.naumen.counter.impls.UnsafeCounter':
+ Experiment [1/5]:  value = 74618414 time = 25 ms
+ Experiment [2/5]:  value = 66158308 time = 3 ms
+ Experiment [3/5]:  value = 54063137 time = 3 ms
+ Experiment [4/5]:  value = 76346929 time = 4 ms
+ Experiment [5/5]:  value = 44644001 time = 4 ms
+ Average time:  7 ms
+                     </pre>
+            <p>Быстро, но неправильно.</p>
+            <div class="cartoon"><img src="img/04/boo.png"/></div>
+            <aside class="notes">
+                Посмотрим вывод программы, здесь он показателен. Мы видим, что результат ни разу не сто миллионов, но
+                код отработал очень быстро.
+            </aside>
+        </section>
+        <section>
+            <h2>Инкремент не атомарен</h2>
+            <img src="img/04/concurrent_increment.png"/>
+            <aside class="notes">
+                Почему же так вышло? Дело в том, что инкремент не атомарен. Из этого следует, что если два потока
+                инкрементируя счетчик пересекутся во времени, например вот таким образом как показано на картинке, могут
+                перетереть результат выполнения друг друга. (Показ на картинке)
+            </aside>
+        </section>
+        <section>
+            <h2>Базовые термины</h2>
+            <ul>
+                <li>Critical Section</li>
+                <li>Semaphore</li>
+                <li>Mutex</li>
+                <li>Monitor</li>
+                <li>Lock</li>
+            </ul>
+            <aside class="notes">
+                Для того, что бы решить эту неприятную проблему, необходимо немножко синхронизировать наш код. Но для
+                начала введем ряд терминов, которые мы будем использовать.
+            </aside>
+        </section>
+        <section>
+            <h2>Critical Section</h2>
+            <p>Участок исполняемого кода программы, в котором производится доступ к общему ресурсу (данным или
+                устройству), который не должен быть одновременно использован более чем одним потоком исполнения</p>
+            <aside class="notes">
+                Критическая секция, это такой блок кода, который в один момент времени может быть исполнен, только одним
+                потоком.
+            </aside>
+        </section>
+        <section>
+            <h2>Semaphore</h2>
+            <p>Объект, ограничивающий количество потоков, которые могут войти в заданный участок кода. (Э. Дейкстра)</p>
+            <p>Возможные операции над семафором:</p>
+            <pre>
+init(n): //Инициализация семафора (задать начальное значение счётчика)
+    счётчик := n
+
+enter()://Захват семафора (ждать пока счётчик станет больше 0, после этого уменьшить счётчик на единицу)
+    счётчик := счётчик - 1
+
+leave()://Освобождение семафора (увеличить счётчик на единицу)
+    счётчик := счётчик + 1
+                    </pre>
+            <aside class="notes">
+                Здесь представлено академическое определение семаформа, я не буду его читать, вы сможете сделать сами.
+            </aside>
+        </section>
+        <section>
+            <h2>Mutex</h2>
+            <p>это простейшие двоичные семафоры, которые могут находиться в одном из двух состояний — отмеченном или
+                неотмеченном.</p>
+            <aside class="notes">
+                Про мютексы тоже прочитайте сами, а я расскажу как в свое время мой преподаватель по программированию
+                объяснил нам, эти понятия.
+                Мютекс - это когда есть сортир, на его двери висит ключик, ты берешь ключик, заходишь закрываешь,
+                делаешь дела, выходишь и вешаешь ключик на место.
+                А семафор, это когда есть сортир, но ключик от него есть у тебя, у твоего друга и всех твоих соседей
+            </aside>
+        </section>
+        <section>
+            <h2>Monitor</h2>
+            <p>Высокоуровневая кострукция, которая состоит из mutex-а и массива ожидающих очереди потоков.</p>
+            <p>У монитора должен быть механизм остановки потока и сигнализации о доступности продолжения работы.</p>
+            <aside class="notes">
+                В java абсолютно все объекты могут быть использованны в качестве мониторов. Монитор, это мьютекс плюс
+                массив ожидающих его потоков.
+            </aside>
+        </section>
+        <section>
+            <h2>Lock</h2>
+            <p>Это механизм синхронизации, позволяющий обеспечить исключительный доступ к разделяемому ресурсу между
+                несколькими потоками</p>
+            <p><b>Мягкая блокировка</b> — каждый поток пытается получить блокировку перед доступом к соответсвующему
+                разделяемому ресурсу.</p>
+            <p><b>Обязательная блокировка</b> — попытка несанкционированного доступа к заблокированному ресурсу будет
+                прервана, через создание исключения.</p>
+            <aside class="notes">
+                Блокировочка - это один из механизмов организации критической секциию. Бывают мягкие и обязательные
+                блокировкию. При мягкой блокировке поток попытается захватить блокировку, если не получится - подождет,
+                нули пойдет другим позанимается. При обязательной блокировке, при попытке захватить занятую блокировку
+                будет выброшено исключение.
+            </aside>
+        </section>
+        <section>
+            <h2>Ключевое слово synchronized</h2>
+            <p>Синхронизация методов на текущем объекте</p>
+            <pre style="width:auto;"><code data-trim class="java">
+public class SynchronizedCounter implements Counter{
+    private int counter = 0;
+
+    @Override
+    public synchronized int get(){
+        return counter;
+    }
+
+    @Override
+    public synchronized void increment(){
+        counter++;
+    }
+
+    @Override
+    public synchronized void reset(){
+        counter = 0;
+    }
+}
+                    </code></pre>
+            <div class="rubber_stamp fragment">AVG. TIME = 6076 ms</div>
+            <aside class="notes">
+                В java для организации критических секций есть ключевое слово synchronized. Им можно помечать методы,
+                классы, а также отдельные блоки кода. Не долго думая я пометил им все методы. И программа правильно
+                заработала... Но стала медленне в две тысячи раз.
+                Перейти на слайд вперед.
+                В данном случае объектом синхронизации будет экземпляр класса (в случае класса тоже он).
+                Перейти на два слайда вперед.
+            </aside>
+        </section>
+        <section>
+            <h2>Ключевое слово synchronized</h2>
+            <p>Синхронизация блока на произвольном объекте</p>
+            <pre style="width:auto;"><code data-trim class="java">
+Object lock = new Object();
+synchronized(lock){
+	//do something
+}
+                    </code></pre>
+            <aside class="notes">
+                Как я и говорил synchronized можно помечать отдельные блоки кода, выглядит это так. Object lock в данном
+                случае является объектом синхронизации.
+                Вернуться на слайд назад.
+            </aside>
+        </section>
+        <section>
+            <h2>Ключевое слово synchronized</h2>
+            <p>Синхронизация статического метода</p>
+            <pre style="width:auto;"><code data-trim class="java">
+public class TestStaticSync{
+    public static synchronized void doSomething(){
+        //do something
+    }
+}
+                    </code></pre>
+            <p>Синхронизация происходит на объекте TestStaticSync.class</p>
+            <aside class="notes">
+                Синхронизировать можно также статические методы. Объект синхронизации - сам класс.
+            </aside>
+        </section>
+        <section>
+            <h2>Singleton</h2>
+            <ul>
+                <li>Потокобезопасный
+                    <ul>
+                        <li>Все получат один и тот же синглетон</li>
+                        <li>Корректно проиницилизирован</li>
+                    </ul>
+                </li>
+                <li>Ленивый</li>
+                <li>Эффективный</li>
+            </ul>
+            <aside class="notes">
+                Наверное вы все знаете паттерн проектирования Одиночка или Singleton. Попробуем сделать его
+                потокобезопасным. Предъявим к нему следующие требования:
+                * для всех он будет один
+                * у него будет консистентное состояние
+                * он проинициализируется, только тогда когда понадобится
+                * он будет быстро работать
+            </aside>
+        </section>
+        <section>
+            <h2>Synchronized Accessor</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class Singleton{
+    private static Singleton instance;
+
+    public static synchronized Singleton getInstance(){
+        if (instance == null){
+            instance = new Singleton();
+        }
+        return instance;
+    }
+}
+                    </code></pre>
+            <div class="cartoon fragment"><img src="img/04/boo.png"/></div>
+            <aside class="notes">
+                Я умею писать Singleton и знаю, что если мне нужем потокобезопасный код мне нужно куданибудь воткнуть
+                synchronized. Я написал вот такой код, и он удовлетворяет всем требованием кроме последнего, он очень
+                медленный. Я буду синхронизироваться даже когда он проинициализирован, многонакладных расходов на пустом
+                месте.
+            </aside>
+        </section>
+        <section>
+            <h2>Double Checked Locking</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class Singleton {
+        private static Singleton instance;
+
+        public static Singleton getInstance() {
+        Singleton localInstance = instance;
+        if (localInstance == null) {
+            synchronized (Singleton.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new Singleton();
+                }
+            }
+        }
+        return localInstance;
+    }
+}
+                    </code></pre>
+            <div class="cartoon fragment"><img src="img/04/boo.png"/></div>
+            <aside class="notes">
+                Есть идиома двойной проверки, применив её для Singleton получим следующий код (описание словами).
+                Он будет быстро работать, но иногда внезапно неправильно. Это связано с особенностью реализации JMM.
+            </aside>
+        </section>
+        <section>
+            <h2>volatile</h2>
+            <ul>
+                <li>Потоки могут кешировать переменные</li>
+                <li>Значения в кешах разных потоков могут не совпадать</li>
+            </ul>
+            <pre style="width:auto;"><code data-trim class="java">
+volatile int i = 0; // означает, то что переменную i
+                    //нужно всегда брать из общей памяти
+                    </code></pre>
+            <aside class="notes">
+                В java потоки кешируют переменные и поток может не узнать об изменении переменной в другом потоке.
+                Но если пометить переменную ключевым словом volatile, то потоки не будут её кешировать.
+            </aside>
+        </section>
+        <section>
+            <h2>Double Checked Locking &amp; volatile</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class Singleton {
+        private static volatile Singleton instance;
+
+        public static Singleton getInstance() {
+        Singleton localInstance = instance;
+        if (localInstance == null) {
+            synchronized (Singleton.class) {
+                localInstance = instance;
+                if (localInstance == null) {
+                    instance = localInstance = new Singleton();
+                }
+            }
+        }
+        return localInstance;
+    }
+}
+                    </code></pre>
+            <div class="cartoon fragment"><img src="img/04/thumbs_up.png"/></div>
+            <aside class="notes">
+                Вот теперь все работает правильно.
+            </aside>
+        </section>
+        <section>
+            <h2>Очередь заданий</h2>
+            <img src="img/04/producer-consumer-model.png"/>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <aside class="notes">
+                Следующей задачей будет очередь заданий, есть очередь заданий, есть штука которая напихивает задания в
+                очередь, и несколько штук, которые читают из очереди. Нужно, что бы одно задание отдавалось только один
+                раз, если очередь пустая поток ждет пока она не наполнится.
+            </aside>
+        </section>
+        <section>
+            <h2>wait()/notify()/notifyAll()</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class JobQueue{
+ List&lt;Runnable&gt; jobs = new ArrayList&lt;&gt;();
+
+ public synchronized void put(Runnable job){
+  jobs.add(job);
+  this.notifyAll();
+ }
+
+ public synchronized Runnable getJob(){
+  while (jobs.size()==0){
+   this.wait();
+  }
+  return jobs.remove(0);
+ }
+}
+                    </code></pre>
+            <aside class="notes">
+                Для решения данной задачи используются мониторы. При получении задачи из очереди, если она пустая мы
+                переходим в ожидание. Обратим внимание на то что wait мы запускаем в цикле, дело в том что java не
+                гарантирует того, что он поток проснется только тогда когда будет позван notifyAll, это может произойти
+                раньше. Зачем вообще использовать эти мониторы? можно же просто крутиться в цикле пока не появится
+                задача! Можно, но это жрет процессорное время.
+            </aside>
+        </section>
+        <section>
+            <h2>interface Lock</h2>
+            <pre style="width:auto;"><code data-trim class="java medium">
+Lock l = ...;
+l.lock();
+try
+{
+    //действия над ресурсом, защищенным данной блокировкой
+}
+finally
+{
+    l.unlock() //гарантия того, что блокировка будет отпущена
+}
+                    </code></pre>
+            <aside class="notes">
+                Блокировочка в JAVA описана интерфейсом Lock. На слайде показано, как правильно пользоваться
+                блокировкой.
+            </aside>
+        </section>
+        <section>
+            <h2>interface Lock</h2>
+            <ul>
+                <p>Широко используются две основные реализации Lock:</p>
+                <li>ReentrantLock</li>
+                <li>ReadWriteLock - имеет разные механизмы блокировки на чтение и запись, позволяя уменьшить накладные
+                    расходы
+                </li>
+            </ul>
+            <aside class="notes">
+                Существует две сымые частоиспользуемые реализации блокировок: просто блокировка и блокировка с
+                разделением на чтение запись.
+                Пишет один, читают много, читать когда пишут нельзя.
+            </aside>
+        </section>
+        <section>
+            <h2>ReentrantLock</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class ReentrantLockCounter implements Counter{
+    ReentrantLock lock;
+    private int counter = 0;
+
+    public ReentrantLockCounter(boolean fair){
+        lock = new ReentrantLock(fair);
+    }
+
+    ...
+
+    @Override
+    public void increment(){
+        lock.lock();
+        try{
+            counter++;
+        }
+        finally{
+            lock.unlock();
+        }
+    }
+    ...
+}
+                    </code></pre>
+            <div class="rubber_stamp fragment">AVG. TIME = 3654 ms</div>
+            <aside class="notes">
+                Мы видим, что счетчик на блокировке работает быстрее.
+            </aside>
+        </section>
+        <section>
+            <h2>interface Condition</h2>
+            <ul>
+                <li>Методы:</li>
+                <pre style="width:auto;"><code data-trim class="java">
+void await() throws InterruptedException;
+void signal();
+void signalAll();
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+                через блокировку можно получить объект Condition, по сути это монитор.
+            </aside>
+        </section>
+        <section>
+            <h2>interface Condition</h2>
+            <ul>
+                <li>Создание:</li>
+                <pre style="width:auto;"><code data-trim class="java">
+Lock lock = new ReentrantLock();
+Condition blockingPoolA = lock.newCondition();
+Condition blockingPoolB = lock.newCondition();
+Condition blockingPoolC = lock.newCondition();
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+                Получается он следующим образом
+            </aside>
+        </section>
+        <section>
+            <h2>Condition: применение</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class JobQueueWithLock{
+    List&lt;Runnable&gt; jobs = new ArrayList&lt;&gt;();
+    Lock lock = new ReentrantLock();
+    Condition cond = lock.newCondition();
+    public void put(Runnable job){
+        lock.lock();
+        try {
+            jobs.add(job);
+            cond.signalAll();
+        }
+        finally {lock.unlock();}
+    }
+    public Runnable getJob(){
+        lock.lock();
+        try{
+            while (jobs.size() == 0)
+                cond.await();
+            return jobs.remove(0);
+        }
+        finally{
+            lock.unlock();
+        }
+    }
+}
+                    </code></pre>
+            <aside class="notes">
+                Вот реализация очереди заданий на блокировках и условиях
+            </aside>
+        </section>
+        <section>
+            <h2>Задача о читателях и писателях</h2>
+            <ul>
+                <li>Читать могут много потоков одновременно</li>
+                <li>Писать может только один поток</li>
+                <li>Читать во время записи нельзя</li>
+            </ul>
+            <img src="img/04/readers_and_writers.png"/>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <aside class="notes">
+                Вот еще одна задачка, собсвенно для решения которой в том числе и придумали RW блокировку
+            </aside>
+        </section>
+        <section>
+            <h2>ReentrantReadWriteLock</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class RWLockCounter implements Counter{
+    ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private int counter = 0;
+
+    public RWLockCounter(boolean fair){
+        lock = new ReentrantReadWriteLock(fair);
+    }
+
+    ...
+
+    @Override
+    public void increment(){
+        lock.writeLock().lock();
+        counter++;
+        lock.writeLock().unlock();
+    }
+
+    ...
+}
+                    </code></pre>
+            <div class="rubber_stamp fragment">AVG. TIME = 3544 ms</div>
+            <aside class="notes">
+                Вот реализация счетчика на RW блокировке в инкременте мы используем write-lock, а для get используем
+                read. Мы видим, что время не отличается от примера с просто блокировкой. Это так, потому что у нас
+                только запись, поэто преимущества мы не видим.
+
+            </aside>
+        </section>
+        <section>
+            <h2>StampedLock</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class StampedLockCounter implements Counter
+{
+    StampedLock lock;
+    private int counter = 0;
+
+    public StampedLockCounter()
+    {
+        lock = new StampedLock();
+    }
+
+    ...
+
+    @Override
+    public void increment()
+    {
+        long stamp = lock.writeLock();
+        counter++;
+        lock.unlockWrite(stamp);
+    }
+
+    ...
+}
+                    </code></pre>
+            <div class="rubber_stamp fragment">AVG. TIME = 3164 ms</div>
+            <aside class="notes">
+                Интересная реализация, с ним можно работать как с обычным rw-локом. Но есть понятие оптимистичной
+                блокировки tryOptimisticRead() этот метод возвращает штамп котоый мы можем валидировать методом validate
+            </aside>
+        </section>
+        <section>
+            <h2>Атомарные операции</h2>
+            <p>Атомарные операции выполняются целиком, их выполнение не может быть прервано планировщиком потоков.</p>
+            <p>Аппаратная поддержка — compare-and-swap</p>
+            <aside class="notes">
+                Атомарные означает неделимые, во время их выполнения планировщик не может прервать поток. Они довольно
+                быстрые, благодаря тому, что это реализовано на уровне процессора. Про то как работает CAS я расскажу
+                через слайд.
+            </aside>
+        </section>
+        <section>
+            <h2>Атомарные операции</h2>
+            <p>Классы для выполнения атомарных операций находятся в java.util.concurrent.atomic:</p>
+            <ul>
+                <li>AtomicInteger</li>
+                <li>AtomicLong</li>
+                <li>AtomicDouble</li>
+                <li>AtomicReference</li>
+            </ul>
+            <aside class="notes">
+                В java все что касается атомарных операций находится в java.util.concurrent.atomic
+                Реализованны атомарные версии примитивных типов и ссылок.
+            </aside>
+        </section>
+        <section>
+            <h2>CAS</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class SimulatedCAS
+{
+    private int value;
+
+    public synchronized int getValue() { return value; }
+
+    public synchronized int compareAndSwap(int expectedValue, int newValue)
+    {
+        int oldValue = value;
+        if (value == expectedValue)
+        {
+            value = newValue;
+        }
+        return oldValue;
+    }
+}
+                </code></pre>
+            <aside class="notes">
+                Ну а вот так примерно работает CAS. очень примерно) В случае если нам нужно изменить какуюто переменную
+                мы вызываем compareAndSwap передавая значаение которое нам известно и новое значение. Если значение
+                совпало с текущим, все просто - мы меняем значение, если нет - то возвращаем текущее значение. и код
+                вызывающий compareAndSwap должен это как то обработать.
+            </aside>
+        </section>
+        <section>
+            <h2>AtomicInteger</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+public class AtomicCounter implements Counter
+{
+    private AtomicInteger counter = new AtomicInteger(0);
+
+    @Override
+    public int get()
+    {
+        return counter.intValue();
+    }
+
+    @Override
+    public void increment()
+    {
+        counter.incrementAndGet();
+    }
+
+    @Override
+    public void reset()
+    {
+        counter.set(0);
+    }
+}
+                    </code></pre>
+            <div class="rubber_stamp fragment">AVG. TIME = 1701 ms</div>
+            <aside class="notes">
+                Вот реализация счетчик на атомарном инте. И она показывает фантастический результат)
+            </aside>
+        </section>
+        <section>
+            <h2>Производительность</h2>
+            <table>
+                <thead>
+                <tr>
+                    <td>Метод синхронизации</td>
+                    <td>Среднее время выполнения (мс)</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>AtomicInteger</td>
+                    <td>1701</td>
+                </tr>
+                <tr>
+                    <td>StampedLock</td>
+                    <td>3164</td>
+                </tr>
+                <tr>
+                    <td>ReentrantReadWriteLock</td>
+                    <td>3544</td>
+                </tr>
+                <tr>
+                    <td>ReentrantLock</td>
+                    <td>3654</td>
+                </tr>
+                <tr>
+                    <td>synchronized</td>
+                    <td>6076</td>
+                </tr>
+                </tbody>
+            </table>
+            <aside class="notes">
+                Вот сравнительная таблица результатов.
+                Ну а теперь в энциклопедическом варианте я вас попытаюсь познакомить с фишками языка Java для реализации
+                многопоточности.
+            </aside>
+        </section>
+        <section>
+            <h2>ThreadLocal</h2>
+            <ul>
+                <li>Позволяет хранить данные изолированно от других потоков</li>
+            </ul>
+            <pre style="width:auto;"><code data-trim class="java">
+public class ShoppingCard{
+    ThreadLocal&lt;ArrayList&lt;Item>> myThreadLocal = ThreadLocal.withInitial(ArrayList::new);
+
+    public void add(Item item){
+        myThreadLocal.get().add(item);
+    }
+
+    public String getReceipt(){
+        StringBuilder sb = new StringBuilder();
+        myThreadLocal.get().forEach(item -> sb.append(String.format("%s - %d$\n", item.getName(), item.getPrice())));
+        return sb.toString();
+    }
+
+    public void remove(Item item){
+        myThreadLocal.get().remove(item);
+    }
+}
+                    </code></pre>
+            <aside class="notes">
+                Мы до этого в основном говорили об организации многопоточного доступа к одному ресурсу, но иногда перед
+                нами стоит обратная задача - организовать хранилище к которому имеет доступ только один поток. Для этого
+                в java есть ThreadLocal. Рассмотрим их применение на примере покупательской корзины.
+            </aside>
+        </section>
+        <section>
+            <h2>ThreadLocal</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+ShoppingCard shoppingCard = new ShoppingCard();
+
+Thread customer1 = new Thread(() -> {
+    shoppingCard.add(new Item("Banana", 1));
+    shoppingCard.add(new Item("Beer", 5));
+    System.out.format("Receipt for customer1 :\n%s\n", shoppingCard.getReceipt());
+});
+
+Thread customer2 = new Thread(() -> {
+    shoppingCard.add(new Item("Cola", 2));
+    shoppingCard.add(new Item("Bread", 1));
+    System.out.format("Receipt for customer2 :\n%s\n", shoppingCard.getReceipt());
+});
+
+customer1.start();
+customer2.start();
+customer1.join();
+customer2.join();
+                    </code></pre>
+            <aside class="notes">
+                Здесь мы видим, что корзина одна, а потока два. Но в выводе программы мы увидим, что у каждого в корзине
+                по два продукта и там именно то что он помещал.
+            </aside>
+        </section>
+        <section>
+            <h2>Потокобезопасные структуры данных</h2>
+            <ul>
+                <li>CopyOnWriteArrayList</li>
+                <li>CopyOnWriteArraySet</li>
+                <li>ConcurrentHashMap</li>
+                <li>ConcurrentLinkedDeque</li>
+                <li>ConcurrentLinkedQueue</li>
+                <li>ConcurrentSkipListMap</li>
+                <li>ConcurrentSkipListSet</li>
+            </ul>
+            <aside class="notes">
+                Разработчики Java позаботились о нас и подготовили для нас набор потокобезопасных структур данных на все
+                случаи жизни. В принципе чаще всего их достаточно, можно ими пользоваться и ваще не вспоминать, тот ужас
+                о котором я говорил последние 40 минут) Рассмотрим, что же нам предлагает java, про Copy-on-write я
+                расскажу на следующем слайде. расскажу про Concurrent структуры. 
+				ConcurrentSkipListMap - гарантирует нам сложность операций O (log (n)) и элементы в нем отсортированы.
+            </aside>
+        </section>
+        <section>
+            <h2>Copy-on-write</h2>
+            <ul>
+                <li>CopyOnWriteArrayList и CopyOnWriteArraySet основаны на массиве, копируемом при операции записи</li>
+                <li>Хороши когда 90% чтения</li>
+                <li>При частой записи большая коллекция может убить производительность</li>
+                <li>Сортировки нет</li>
+                <li>Итераторы не поддерживают операций модификации</li>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Производитель-потребитель</h2>
+            <ul>
+                <li>Один поток производит данные, второй их потребляет</li>
+                <li>Несколько потоков производят данные и несколько их потребляют</li>
+                <li>Данные могут храниться в очереди (не)ограниченного объема</li>
+            </ul>
+            <img src="img/04/producer_consumer.png"/>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Задания-работники</h2>
+            <ul>
+                <li>Поток-клиент ждет выполнения задания потоком-сервером</li>
+            </ul>
+            <img src="img/04/task_and_workers.png"/>
+            <div class="cartoon"><img src="img/04/problem.png"/></div>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Блокирующие очереди</h2>
+            <ul>
+                <li>ArrayBlockingQueue</li>
+                <li>LinkedBlockingDeque</li>
+                <li>LinkedBlockingQueue</li>
+                <li>PriorityBlockingQueue</li>
+                <li>DelayQueue элементы с задержкой</li>
+                <li>LinkedTransferQueue универсальная очередь</li>
+                <li>SynchronousQueue ёмкость 0</li>
+            </ul>
+            <aside class="notes">
+				DelayQueue - можно взять из очереди только те элементы для которых прошла их задержка
+				LinkedTransferQueue - блокируют поток записи до тех пор, пока другой поток не извлечет элемент
+				SynchronousQueue - блокирующую очередь без емкости (операция добавления одного потока находится в ожидании соответствующей операции удаления в другом потоке)
+            </aside>
+        </section>
+        <section>
+            <h2>Пул потоков</h2>
+            <ul>
+                <li>Переиспользование потоков</li>
+                <li>Ограниченное число потоков</li>
+                <li>Очередь заданий</li>
+            </ul>
+            <aside class="notes">
+                Создание потока это дорогая операция, поэтому лучше их не создавать каждый раз, а переиспользавать для
+                этого есть пулы потоков.
+            </aside>
+        </section>
+        <section>
+            <h2>ExecutorService Framework</h2>
+            <p><b>Цель применения:</b> отделить работу, выполняемую внутри потока, от логики создания потоков.</p>
+            <p>Создание:</p>
+            <pre style="width:auto;"><code data-trim class="java">
+Executors.newCachedThreadPool();        //Создаёт новые потоки при необходимости,
+                                        //повторно использует освободившиеся потоки
+
+Executors.newFixedThreadPool(12);       //С ограничением количества потоков
+
+Executors.newSingleThreadExecutor();    //Ровно один поток
+
+Executors.newScheduledThreadPool();     //Можно настроить задержку запуска / повторный запуск
+                    </code></pre>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Clients &amp; Workers</h2>
+            <pre style="width:auto;"><code data-trim class="java">
+ExecutorService workers = Executors.newFixedThreadPool(5);
+ExecutorService clients = Executors.newFixedThreadPool(10);
+
+for (int i = 3; i < 20; i++){
+    final int idx = i;
+    Callable&lt;Long> task = (i % 2 == 0)? (()->calculateFibonacci(idx)):
+                                        (()->calculateFactorial(idx));
+    Future&lt;Long> future = workers.submit(task);
+
+    clients.execute(() -> {
+        try{
+            Long result = future.get();
+            System.out.format("%s for %d = %d\n",
+                               idx % 2 == 0 ? "Fibonacci" : "Factorial",
+                               idx, result);
+        }
+        catch (InterruptedException | ExecutionException e){
+            e.printStackTrace();
+        }
+    });
+}
+workers.shutdown();
+clients.shutdown();
+                    </code></pre>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <ul>
+                <li><b>ForkJoinPool</b></li>
+                <ul>
+                    <li>… implements ExecutorService</li>
+                    <li>т.е. туда можно засылать и обычные Runnable, Callable</li>
+                </ul>
+                <li><b>ForkJoinTask&lt;V></b></li>
+                <ul>
+                    <li> RecursiveAction</li>
+                    <li> RecursiveTask&lt;V></li>
+                </ul>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <ul>
+                <li>Подход FJP - Work stealing</li>
+                <ul>
+                    <li>У каждого потока своя очередь</li>
+                    <li>С головой очереди может работать только владелец</li>
+                    <li>Свободные потоки крадут задачи у перегруженных(из хвоста)</li>
+                </ul>
+            </ul>
+            <aside class="notes">
+                позже будет картинка
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <p>Пример RecursiveTask</p>
+            <pre style="width:auto;"><code data-trim class="java medium">
+private static class StandardTask extends RecursiveTask&lt;Long>{
+    private final Problem problem;
+    private final int l;
+    private final int r;
+    public StandardTask(Problem p, int l, int r) {
+        this.problem = p;
+        this.l = l;
+        this.r = r;
+    }
+    @Override
+    protected Long compute() {
+        if (r - l <= THRESHOLD){
+            return problem.solve(l, r);
+        }
+        int mid = (l + r) >>> 1;
+        ForkJoinTask&lt;Long> t1 = new StandardTask(problem, l, mid);
+        ForkJoinTask&lt;Long> t2 = new StandardTask(problem, mid, r);
+        t1.fork();
+        t2.fork();
+        long res = 0;
+        res += t2.join();
+        res += t1.join();
+        return res;
+    }
+ }
+                     </code></pre>
+            <aside class="notes">
+                дальше будет листинг compute
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <p>Пример RecursiveTask</p>
+            <pre style="width:auto;"><code data-trim class="java">
+ForkJoinTask&lt;Long> t1 = new StandardTask(problem, l, mid);
+ForkJoinTask&lt;Long> t2 = new StandardTask(problem, mid, r);
+t1.fork();
+t2.fork();
+long res = 0;
+res += t2.join();
+res += t1.join();
+return res;
+                     </code></pre>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <ul>
+                <li>fork():</li>
+                <ul>
+                    <li>Кладёт задачу в очередь, и возвращается</li>
+                    <li>Кто-нибудь другой может эту задачу подхватить</li>
+                </ul>
+                <li>join():</li>
+                <ul>
+                    <li>Блокируется, пока задача не закончится</li>
+                    <li>Но поток терять на этом нельзя!</li>
+                    <li>FJP может дать ему что-нибудь повыполнять</li>
+                </ul>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Fork/Join API</h2>
+            <img src="img/04/work_steal.png">>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>Parallel Stream</h2>
+            <ul>
+                <li>Использует FJP</li>
+                <li>BaseStream.parallel</li>
+                <li>Collection.parallelStream</li>
+                <pre style="width:auto;"><code data-trim class="java">
+double average = persons
+    .parallelStream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .mapToInt(Person::getAge)
+    .average()
+    .getAsDouble();
+                        </code></pre>
+            </ul>
+
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Удобный способ написания асинхронного кода</li>
+                <li>Создание:</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;Integer> answer = CompletableFuture.completedFuture(42);
+
+CompletableFuture&lt;Integer> answer =  CompletableFuture.supplyAsync(() -> someOperation());
+
+CompletableFuture&lt;Integer> answer =  CompletableFuture.supplyAsync(() -> someOperation(),
+                                                                                executorService);
+                        </code></pre>
+                <li class="fragment">Получение результата</li>
+                <pre style="width:auto;"><code data-trim class="java fragment">
+                            Integer result = answer.get(); //блокирует
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Обработка результатов</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;Integer> answer =  CompletableFuture.supplyAsync(() -> someOperation());
+answer.thenAccept(a -> System.out.format("Answer: %d", a));
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Цепочка обработки</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;Integer> wordsCount =  CompletableFuture.supplyAsync(() -> getText())
+                                                         .thenApply(text -> text.split(" "))
+                                                         .thenApply(words -> words.length);
+System.out.format("Words count: %d", wordsCount.get());
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Обработка результатов нескольких CompletableFuture</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;String> text1 =  CompletableFuture.supplyAsync(() -> getText(1));
+CompletableFuture&lt;String> text2 =  CompletableFuture.supplyAsync(() -> getText(1));
+CompletableFuture&lt;Integer> both = text1.
+                thenCombine(text2, (String textOne, String textTwo) ->
+                        textOne.length() + textTwo.length()
+                );
+both.thenAccept(length -> System.out.format("Total length: %d", length));
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Ожидание результатов нескольких CompletableFuture</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;String> text1 =  CompletableFuture.supplyAsync(() -> getText(1));
+CompletableFuture&lt;String> text2 =  CompletableFuture.supplyAsync(() -> getText(2));
+CompletableFuture&lt;String> text3 =  CompletableFuture.supplyAsync(() -> getText(3));
+CompletableFuture&lt;String> text4 =  CompletableFuture.supplyAsync(() -> getText(4));
+CompletableFuture&lt;Void> allCompleted = CompletableFuture.allOf(text1, text2, text3, text4);
+allCompleted.thenRun(() -> {
+    try {
+        System.out.format("Loaded: %d", text1.get());
+        System.out.format("Loaded: %d", text2.get());
+        System.out.format("Loaded: %d", text3.get());
+        System.out.format("Loaded: %d", text4.get());
+    } catch (InterruptedException | ExecutionException e) {
+        e.printStackTrace();
+    }
+});
+                );
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h2>CompletableFuture</h2>
+            <ul>
+                <li>Обработка ошибок</li>
+                <pre style="width:auto;"><code data-trim class="java">
+CompletableFuture&lt;String> text1 =  CompletableFuture.supplyAsync(() -> getText(1));
+CompletableFuture&lt;String> recovered = text1.handle((result, throwable) -> {
+                    if (throwable != null) {
+                        return "Not text here! Exception: " + throwable;
+                    } else {
+                        return result.toUpperCase();
+                    }
+                });
+
+CompletableFuture&lt;String> text2 =  CompletableFuture.supplyAsync(() -> getText(2));
+CompletableFuture&lt;String> recovered = text1.exceptionally(throwable -> "Sorry, try again later");
+                        </code></pre>
+            </ul>
+            <aside class="notes">
+
+            </aside>
+        </section>
+        <section>
+            <h1>Вопросы?</h1>
+            <aside class="notes">
+
+            </aside>
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+    // Full list of configuration options available at:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: false,
+        progress: true,
+        history: true,
+        center: true,
+        slideNumber: true,
+
+        transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+        // Optional reveal.js plugins
+        dependencies: [
+            {
+                src: 'lib/js/classList.js', condition: function () {
+                    return !document.body.classList;
+                }
+            },
+            {
+                src: 'plugin/markdown/marked.js', condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            },
+            {
+                src: 'plugin/markdown/markdown.js', condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            },
+            {
+                src: 'plugin/highlight/highlight.js', async: true, condition: function () {
+                    return !!document.querySelector('pre code');
+                }, callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            },
+            {src: 'plugin/zoom-js/zoom.js', async: true},
+            {src: 'plugin/notes/notes.js', async: true}
+        ]
+    });
+
+</script>
+
+</body>
+</html>
