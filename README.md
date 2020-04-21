@@ -12,8 +12,7 @@
 * Лекция 6. [JVM: управление памятью. GC](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture06.pdf)
 * Лекция 7. [Многопоточность и JAVA](https://naumen-student.github.io/EnterpriseJavaCourse-s2020/lecture/lecture07.html)
 * *Практика 3.*
-* Лекция 8. Tooling
-* Лекция 9. Архитектура корпоративных приложений
+* Лекция 8. Архитектура корпоративных приложений
 * *Зачет*
 
 ## Практика
