@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Corp Arch</title>
+
+        <meta name="description" content="${TalkDescription}">
+        <meta name="author" content="${TalkAuthor}">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/white.css" id="theme">
+
+        <link rel="stylesheet" href="css/hljs/vs.css" id="highlight-theme">
+
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+
+        <style>
+.reveal .slide-number {
+    font-size:22pt;
+    color:black;
+}
+
+.reveal pre {
+    background: none;
+    border: none;
+    box-shadow: none;    
+}
+
+.reveal pre code{
+    color: black;
+    background: none;
+    box-shadow: none;
+    max-height: none;
+}
+
+.reveal section img {
+    border: none;
+    box-shadow: none;
+}
+
+.reveal pre code {
+    overflow: hidden;
+}
+
+.reveal .footer {
+    font-size:22pt;
+    color:black;
+
+    position: absolute; 
+    left: 35%;  
+    bottom: 0.5em;
+}
+        </style>
+    </head>
+
+    <body>
+
+        <div class="reveal">
+        <div class="footer">
+            Муратов Алексей Александрович, Naumen 2019
+        </div>
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
+                <section>
+                    <h1>Архитектура корпоративных приложений</h1>
+                </section>
+                <section>
+                    <h1>Что такое архитектура ?</h1>
+                </section>
+                <section>
+                    <h2>Что такое архитектура ?</h2>
+                    <p>А попробуем рассмотреть на примере</p>
+                </section>
+                <section>
+                    <h2>Пример: Задача аренды авто</h2>
+                    <img src="img/08/rent.jpg">
+                </section>
+                <section>
+                    <h2>Пример</h2>
+                    <p>
+                        Вначале у вас ничего нет.<br/>
+                        У вас есть программа которая ничего не делает<br/>
+                    </p>
+                    <ul>
+                        <li>Бесконечная производительность</li>
+                        <li>Бесконечная масштабируемость</li>
+                        <li>Абсолютная расширяемость</li>
+                        <li>Абсолютная поддержка</li>
+                        <li>Нет багов</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="img/08/ddd1.png">
+                </section>
+                <section>
+                    <img src="img/08/ddd2.png">
+                </section>
+                <section>
+                    <img src="img/08/ddd3.png">
+                </section>
+                <section>
+                    <img src="img/08/ddd4.png">
+                </section>
+                <section>
+                    <h1>Что же делать?</h1>
+                </section>
+                <section>
+                    <img src="img/08/ddd5.png">
+                </section>
+                <section>
+                    <img src="img/08/ddd6.png">
+                </section>
+                <section>
+                    <h2>Layered Architecture</h2>
+                    <h2>(Слоеная архитектура)</h2>
+                </section>
+                <section>
+                    <img src="img/08/layered.png">
+                </section>
+                <section>
+                    <h2>Onion Architecture</h2>
+                    <h2>(Луковая архитектура)</h2>
+                </section>
+                <section>
+                    <img src="img/08/onion.png" style="max-height: 600px">
+                </section>
+                <section>
+                    <h2>Решаемые проблемы</h2>
+                    <ul>
+                        <li>Упрощение системы</li>
+                        <li>Упрощение понимания</li>
+                        <li>Возможность тестирования</li>
+                        <li>Безболезненная замена слоёв и модулей </li>
+                        <li>Повторное использование частей кода</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Цель архитектуры</h2>
+                    <p>
+                        снижение сложности системы путём введения абстракций и разграничения полномочий.
+                    </p>
+                </section>
+                 <section>
+                    <h2>Снижение сложности системы</h2>
+                    <ul>
+                        <li> Декомпозиция</li>
+                        <li> Введение абстракций </li>
+                        <li> Выделение слоёв </li>
+                    </ul>   
+                </section>
+                <section>
+                    <h2>Декомпозиция</h2>   
+                    <ul>
+                        <li> нет циклических зависимостей </li>
+                        <li> не более 7 элементов на уровне </li>
+                        <li> функциональное разделение </li>
+                    </ul>                        
+                </section>
+                <section>
+                    <h2>Введение абстракций</h2>   
+                    <ul>
+                        <li> Железо</li>
+                        <li> Прошивка</li>
+                        <li> Ассемблер</li>
+                        <li> Ядро</li>
+                        <li> Операционная система</li>
+                    </ul>  
+                </section>
+                <section>
+                    <h2>Введение слоев</h2>
+                    <p>
+                        Один из примеров - MVC - Model View Controller
+                    </p>    
+                    <ul>
+                        <li> Слой данных </li>
+                        <li> Слой логики </li>
+                        <li> Слой представления </li>
+                    </ul>                        
+                </section>
+                <section>
+                    <h2>MVC - Model View Controller</h2>
+                    <img src="img/08/mvc_diagram.png">
+                </section>
+                <section>
+                    <h2>Способы описания Архитектуры</h2>
+                    <ul>
+                        <li>специализированные языки описания</li>
+                        <li>UML - Unified Modeling Language</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>UML-диаграмма</h2>
+                    <img src="img/08/image1-8.png">
+                </section>
+                <section>
+                    <h2>Инструменты</h2>
+                    <ul>
+                        <li>draw.io</li>
+                        <li>Dia</li>
+                        <li>Microsoft Office Visio</li>
+                        <li>LibreOffice - Draw</li>
+                        <li>...</li>
+                    </ul>
+                </section>
+                <section>
+                    <h1>Виды архитектур</h1>
+                </section>
+                <section>
+                    <h2>Двухзвенная архитектура</h2>
+                    <ul>
+                        <li>Клиент - СУБД</li>
+                        <li>Клиент - Сервер</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Трехзвенная архитектура</h2>
+                    <ul>
+                        <li>Клиент - Сервер - СУБД</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="img/08/3.png" style="max-height: 600px">
+                </section>
+                <section>
+                    <h2>Многозвенная архитектура</h2>
+                </section>
+                <section>
+                    <h1>Монолитная архитектура</h1>
+                </section>
+                <section>
+                    <p>Плюсы:</p>
+                    <ul>
+                        <li> вся логика по обработке запросов выполняется в единственном процессе</li>
+                        <li> разделение на классы функции модули производится в одном месте</li>
+                        <li> приложение легко запускается и тестируется на машине разработчика</li>
+                        <li> используется стандартный процесс развертывания</li>
+                        <li> легкое горизонтальое масштабирование</li>
+                    </ul>
+                </section>
+                 <section>
+                    <p>Минусы:</p>
+                    <ul>
+                        <li> с течением времени, становится труднее сохранять хорошую модульную структуру</li>
+                        <li> изменения логики одного модуля могут влиять на код других модулей</li>
+                        <li> любое изменение требует пересборки всего монолита</li>
+                        <li> масштабировать приходится все приложение целиком, даже если это требуется только для одного модуля этого приложения</li>
+                    </ul> 
+                </section>
+                <section>
+                    <h1>Микросервисная архитектура</h1>
+                </section>
+                 <section>
+                    <h2>Что это ?</h2>
+                    <ul>
+                        <li>организация сервисов вокруг бизнес-потребностей</li>
+                        <li>автоматическое развертывание</li>
+                        <li>перенос логики от шины сообщений к приемникам (endpoints)</li>
+                        <li>децентрализованный контроль над языками и данными.</li>
+                    </ul>
+                </section>
+                <section>
+                    <h2>Плюсы</h2>
+                    <ul>
+                        <li>писать и поддерживать небольшие сервисы всегда проще, чем большие. </li>
+                        <li>чем меньше кода, тем легче уместить его в голове</li>
+                        <li>разные сервисы могут разрабатываться разными командами</li>
+                        <li>разные микросервисы могут быть написаны на разных языках</li>
+                        <li>испоьзование "правильного" и лучшего инструмента для конкретной задачи</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="img/08/msa.png">
+                </section>
+                <section>
+                    <h1>Resilient architecture</h1>
+                </section>
+                <section>
+                    <h2>Цена ошибки</h2>
+                    <p>
+                        Системные ошибка могут обходится компаниям очень дорого
+                    </p>
+                </section>
+                <section>
+                    <h2>Что делать ?</h2>
+                    <ul>
+                        <li>прекратить предотвращать ошибки</li>
+                        <li>дружите с ошибками</li>
+                        <li>уменьшать время на восстановление после ошибок</li>
+                        <li>улучшать утилиты и сервисы для анализа ошибок</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="img/08/err.jpg">
+                </section>
+                <section>
+                    <h2>Устойчивая архитектура</h2>
+                    <ul>
+                        <li>повышение всевозможного логирования</li>
+                        <li>использование устойчивых моделей</li>
+                        <li>дружить с хаосом</li>
+                        <li>смотреть за ошибками когда они произойдут</li>
+                        <li>измерять все, что можно измерить</li>
+                    </ul> 
+                </section>
+                <section>
+                    <h2>Шаблоны устойчивой архитектуры</h2>
+                    <ul>
+                        <li>timeouts</li>
+                        <li>retries</li>
+                        <li>bulkheads</li>
+                        <li>circuit breakers</li>
+                    </ul> 
+                </section>
+                <section>
+                    <h1>DDD</h1>
+                    <p>
+                        Domain-Driven Design (Проблемно-ориентированное проектирование)
+                    </p>
+                </section>
+                <section>
+                    <h2>DDD</h2>
+                    <p>
+                        это набор принципов и схем, направленных на создание оптимальных систем объектов.
+                        ...
+                        ...
+                        ...
+                    </p>
+                </section>
+                <section>
+                    <h2>DDD Основные моменты</h2>
+                    <ul>
+                        <li> Домен — предметная область, к которой применяется разрабатываемое программное обеспечение.</li>
+                        <li> Модель — описывает отдельные аспекты области и может быть использована для решения проблемы.</li>
+                        <li> Язык описания — используется для единого стиля описания домена и модели.</li>
+                    </ul>
+                </section>
+                <section>
+                    <img src="img/08/ddd8.png">
+                </section>
+                <section>
+                    <img src="img/08/ddd9.png">
+                </section>
+                <section>
+                    <h2>Архитектура тестов</h2>
+                        <p>Применимы подходы к архитектуре, как и для любого другого кода.</p>
+                        <p>При этом в тестах не считается плохой практикой дублирование кода.</p>
+                </section>
+                <section>
+                    <h2>Архитектура тестов</h2>
+                        <p>Универсальные правила написания (четырёхфазные):</p>
+                        <ul>
+                            <li>подготовка</li>
+                            <li>выполнение</li>
+                            <li>проверка</li>
+                            <li>очистка</li>
+                        <ul>
+                </section>
+                <section>
+                    <h2>Архитектура инфраструктуры разработки</h2>
+                    <img src="img/08/image4-14.png">
+                </section>
+                <section>
+                    <h1>Вопросы ?</h1>
+                </section>
+            </div>
+        </div>
+
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+
+        <script>
+
+            // Full list of configuration options available at:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: false,
+                progress: true,
+                history: true,
+                center: true,
+                slideNumber: true,
+
+                transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+                // Optional reveal.js plugins
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true },
+                    { src: 'plugin/notes/notes.js', async: true }
+                ]
+            });
+
+        </script>
+
+    </body>
+</html>
